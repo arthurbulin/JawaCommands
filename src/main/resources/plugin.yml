@@ -1,0 +1,10 @@
+name: JawaCommands
+main: jawamaster.jawacommands.JawaCommands
+version: 0.2
+depends: JawaPermissions
+commands:
+  home:
+    description: Used to set the player's nick name
+    usage: /home <-l/-a/-d> [home name]
+    permission: jawacommands.home
+
