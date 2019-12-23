@@ -4,7 +4,66 @@ version: 0.2
 depends: JawaPermissions
 commands:
   home:
-    description: Used to set the player's nick name
-    usage: /home <-l/-a/-d> [home name]
+    description: Used for home control.
+    usage: /home <-[d|sr|s|i|l|h]> <homename>
     permission: jawacommands.home
-
+  sethome:
+    description: Used to set the player's home positions
+    permission: jawacommands.home.set
+    alias: [addhome]
+  commandtest:
+    description: Jawacommands test command
+    permission: jawacommands
+  delhome:
+    description: Used to delete a home
+    permission: jawacommands.home.del
+    alias: [remhome]
+  listhome:
+    description: Lists a user's homes
+    permission: jawacommands.home.list
+  homeinfo:
+    description: Provides a user with specific home information
+    usage: /homeinfo <homename>
+    permission: jawacommands.home.info
+  sudo:
+    description: Allows an administrative user to force a regular user to run a command.
+    permission: jawacommands.sudo
+  warp:
+    description: Warps a player to a specified warp.
+    permission: warps.warp
+  makewarp:
+    description: Creates a warp.
+    permission: warps.admin.create
+  modwarp:
+    description: Modifies a warp.
+    permission: warps.admin.mod
+  delwarp:
+    description: Deletes a warp.
+    permission: warps.admin.delete
+  wlwarp:
+    description: Adds a user or users to the whitelist, removes them in the same process.
+    permission: warps.admin.wl
+  blwarp:
+    description: Adds a player to the warps blacklist
+    permission: warps.admin.bl
+  gm:
+    description: Changes a player's game mode.
+    permission: gamemode.toggle
+  spawn:
+    description: Send a player to the corresponding world's spawn
+    permission: jawacommands.spawn
+  setspawn:
+    description: Sets the spawn location of a world.
+    permission: jawacommands.setspawn
+  gothere:
+    description: Asks a player if you can teleport to them
+    permission: jawacommands.gothere
+  comehere:
+    description: Asks a player to teleport to you
+    permission: jawacommands.comehere
+  accept:
+    description: Accepts a teleport request
+    permission: jawacommands.accept
+  fullbright:
+    description: Gives you nightvision
+    permission: jawacommands.fullbright

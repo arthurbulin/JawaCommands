@@ -22,6 +22,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
@@ -44,11 +45,11 @@ public class ESHandler {
     
     public ESHandler(JawaCommands plugin) {
         ESHandler.plugin = plugin;
-        ESHandler.restClient = JawaCommands.restClient;
+        //ESHandler.restClient = JawaCommands.restClient;
     }
     
     public static Map<String, Object> getHomeData(Player player, String home, int action) {
-        searchRequest = new SearchRequest("mc");
+        searchRequest = new SearchRequest("homes");
         searchSourceBuilder = new SearchSourceBuilder();
         
         searchSourceBuilder.query(QueryBuilders.matchQuery("_id", player.getUniqueId().toString()));
@@ -56,10 +57,10 @@ public class ESHandler {
         
         SearchResponse searchResponse;
         try {
-            searchResponse = restClient.search(searchRequest);
+            searchResponse = restClient.search(searchRequest,RequestOptions.DEFAULT);
             searchHits = searchResponse.getHits();
             SearchHit[] hits = searchHits.getHits();
-            long totalHits = searchHits.totalHits;
+            long totalHits = searchHits.getTotalHits().value;
             
         if (totalHits == 0){
             //TODO deal with player not in db, this should never happen
@@ -136,9 +137,9 @@ public class ESHandler {
     public static void updateHomeData(Player player, Map<String, Object> playerHomes){
         Map<String, Object> playerDataUpdate = new HashMap();
         playerDataUpdate.put("homes", playerHomes);
-        updateRequest = new UpdateRequest("mc", "players", player.getUniqueId().toString()).doc(playerDataUpdate);
-        
-        restClient.updateAsync(updateRequest, new ActionListener<UpdateResponse>() {
+        //updateRequest = new UpdateRequest("mc", "players", player.getUniqueId().toString()).doc(playerDataUpdate);
+        updateRequest = new UpdateRequest("players", player.getUniqueId().toString()).doc(playerDataUpdate);
+        restClient.updateAsync(updateRequest, RequestOptions.DEFAULT, new ActionListener<UpdateResponse>() {
             @Override
             public void onResponse(UpdateResponse response) {
                 
@@ -156,9 +157,9 @@ public class ESHandler {
         
         Script script = new Script(ScriptType.INLINE, "painless", "ctx._source.homes.remove(\"" + home + "\")", new HashMap());
         
-        updateRequest = new UpdateRequest("mc", "players", player.getUniqueId().toString()).script(script);
-        
-        restClient.updateAsync(updateRequest, new ActionListener<UpdateResponse>() {
+        //updateRequest = new UpdateRequest("mc", "players", player.getUniqueId().toString()).script(script);
+        updateRequest = new UpdateRequest("players", player.getUniqueId().toString()).script(script);
+        restClient.updateAsync(updateRequest, RequestOptions.DEFAULT, new ActionListener<UpdateResponse>() {
             @Override
             public void onResponse(UpdateResponse response) {
                 player.sendMessage(home + " has been removed from your home locations.");
