@@ -1,6 +1,6 @@
 name: JawaCommands
 main: jawamaster.jawacommands.JawaCommands
-version: 0.2
+version: 1.0
 depends: JawaPermissions
 commands:
   home:
