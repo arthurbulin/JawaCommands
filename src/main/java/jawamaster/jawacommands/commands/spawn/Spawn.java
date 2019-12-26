@@ -44,10 +44,7 @@ public class Spawn implements CommandExecutor{
         if ((args == null) || (args.length == 0)) {
             player.teleport(player.getWorld().getSpawnLocation());
             player.sendMessage(ChatColor.DARK_GREEN + " > Spawning you in " + player.getWorld().getName());
-
-        }
-        
-        if (player.hasPermission("jawacommands.spawn." + args[0])){
+        } else if ((args.length > 0) && player.hasPermission("jawacommands.spawn." + args[0])){
             player.teleport(Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
         } else {
             player.sendMessage(ChatColor.RED + " > You do not have permission to spawn in this world!");
