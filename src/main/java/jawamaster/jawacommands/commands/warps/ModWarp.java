@@ -18,8 +18,6 @@ package jawamaster.jawacommands.commands.warps;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.WarpObject;
@@ -48,7 +46,8 @@ public class ModWarp implements CommandExecutor{
         int start = 0;
 
         if ((args== null ) || (args.length < 2)) {
-            //Whatever if less than 2 args
+            commandSender.sendMessage(ChatColor.GREEN + " > Usage: " + usage);
+            return true;
         }
         
         //Evaluate if there are flags

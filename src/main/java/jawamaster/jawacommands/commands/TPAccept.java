@@ -32,7 +32,7 @@ public class TPAccept implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, Command arg1, String arg2, String[] arg3) {
         if (commandSender instanceof Player) {
             Player player = (Player) commandSender;
-            if (player.hasPermission("jawacommands.tpaccept")) {
+            if (player.hasPermission("jawacommands.accept")) {
 
                 boolean accepted = TPHandler.tpAccept(player);
 

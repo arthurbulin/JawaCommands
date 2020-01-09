@@ -36,7 +36,6 @@ public class JSONHandler {
     public static JSONObject LoadJSONConfig(String file){
         
         File JSONFile = new File(JawaCommands.getPlugin().getDataFolder()+file);
-        ;
 
         if (!JSONFile.exists()){
             return null;
@@ -59,8 +58,10 @@ public class JSONHandler {
         File JSONFile = new File(JawaCommands.getPlugin().getDataFolder() + file);
 
         try ( //open our writer and write the player file
-                PrintWriter writer = new PrintWriter(JSONFile)) {
+            PrintWriter writer = new PrintWriter(JSONFile)) {
+            System.out.println(obj);
             writer.print(obj.toString(4));
+            writer.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(JSONHandler.class.getName()).log(Level.SEVERE, null, ex);
         }

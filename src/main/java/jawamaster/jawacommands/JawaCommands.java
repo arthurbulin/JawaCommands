@@ -14,20 +14,30 @@ import jawamaster.jawacommands.commands.TPAccept;
 import jawamaster.jawacommands.commands.home.Home;
 import jawamaster.jawacommands.commands.home.HomeInfo;
 import jawamaster.jawacommands.commands.admin.SudoAs;
+import jawamaster.jawacommands.commands.development.BackCommand;
+import jawamaster.jawacommands.commands.development.Kit;
 import jawamaster.jawacommands.commands.development.TestCommand;
 import jawamaster.jawacommands.commands.home.delHome;
 import jawamaster.jawacommands.commands.home.listHomes;
 import jawamaster.jawacommands.commands.home.setHome;
 import jawamaster.jawacommands.commands.spawn.SetSpawn;
 import jawamaster.jawacommands.commands.spawn.Spawn;
+import jawamaster.jawacommands.commands.spawn.RemoveSpawn;
 import jawamaster.jawacommands.commands.warps.DelWarp;
 import jawamaster.jawacommands.commands.warps.MakeWarp;
 import jawamaster.jawacommands.commands.warps.ModWarp;
 import jawamaster.jawacommands.commands.warps.Warp;
 import jawamaster.jawacommands.commands.warps.WarpBlackList;
 import jawamaster.jawacommands.commands.warps.WarpWhitelist;
+import jawamaster.jawacommands.commands.warps.YeetPort;
+import jawamaster.jawacommands.handlers.KitHandler;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import jawamaster.jawacommands.handlers.WorldHandler;
+import jawamaster.jawacommands.listeners.FirstSpawnListener;
+import jawamaster.jawacommands.listeners.PlayerDeath;
+import jawamaster.jawacommands.listeners.PlayerQuit;
+import jawamaster.jawacommands.listeners.SpawnListener;
+import jawamaster.jawacommands.listeners.TeleportListener;
 import jawamaster.jawapermissions.handlers.ESHandler;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -35,6 +45,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -53,7 +64,11 @@ public class JawaCommands extends JavaPlugin {
     private static HashMap<String, WarpObject> warpIndex;
     private static JSONObject worldConfigurations;
     
-    private static JSONObject backLocations;
+    public static HashMap<UUID, JSONArray> backStack;
+    
+    public static JSONObject worldSpawns;
+    
+    public static JSONObject kits;
     
     
     @Override
@@ -66,7 +81,10 @@ public class JawaCommands extends JavaPlugin {
         
         warpIndex = WarpHandler.loadWarpObjects();
         
-        backLocations = new JSONObject();
+        backStack = new HashMap();
+        worldSpawns = WorldHandler.loadWorldSpawns();
+        
+        kits = KitHandler.loadKits();
         
         this.getCommand("home").setExecutor(new Home());
         this.getCommand("sethome").setExecutor(new setHome());
@@ -93,6 +111,25 @@ public class JawaCommands extends JavaPlugin {
         this.getCommand("accept").setExecutor(new TPAccept());
         
         this.getCommand("fullbright").setExecutor(new FullBright());
+        
+        this.getCommand("removespawn").setExecutor(new RemoveSpawn());
+        
+        this.getCommand("yeetport").setExecutor(new YeetPort());
+        
+        //This should later be moved to tool box
+        this.getCommand("kit").setExecutor(new Kit());
+        
+        this.getCommand("back").setExecutor(new BackCommand());
+        
+        //Register the custom spawn points listener, this should really get moved to toolbox later the same time things are migrated into Core
+        getServer().getPluginManager().registerEvents(new SpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new FirstSpawnListener(), this);
+        
+        //For back command
+        getServer().getPluginManager().registerEvents(new TeleportListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuit(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeath(), this);
+        
     }
     
     @Override
@@ -123,16 +160,13 @@ public class JawaCommands extends JavaPlugin {
         return worldConfigurations;
     }
     
-    public static JSONObject getBackStack(UUID uuid){
-        if (backLocations.keySet().contains(uuid.toString())){
-            return backLocations.getJSONObject(uuid.toString());
-        } else return new JSONObject();
-        
-    }
-    
-    public static void addToBackStack(UUID uuid, JSONObject obj){
-        backLocations.put(uuid.toString(), obj);
-    }
+//    public static JSONObject getBackStack(){
+//        return backStack;
+//    }
+//    
+//    public static void addToBackStack(UUID uuid, JSONArray obj){
+//        backStack.put(uuid.toString(), obj);
+//    }
     
     public static JawaCommands getPlugin(){
         return plugin;

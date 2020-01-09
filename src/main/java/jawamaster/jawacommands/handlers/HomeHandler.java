@@ -25,6 +25,7 @@ import org.bukkit.entity.Player;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.json.JSONObject;
 import jawamaster.jawapermissions.handlers.ESHandler;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 /**
  *
@@ -34,6 +35,7 @@ public class HomeHandler {
     
     private static String red = ChatColor.RED + " > ";
     private static String green = ChatColor.GREEN + " > ";
+    private static String noPermission = ChatColor.RED + " > You do not have permission to do that.";
 
     /** Returns a PlayerDataObject from JawaPermissions. This object will contain
      * any "homes" index data the user has. This information call is private and
@@ -56,24 +58,28 @@ public class HomeHandler {
      * @return 
      */
     public static boolean addHome(Player player, String homeName, boolean replace) {
-        PlayerDataObject pdObject = getPDO(player);
-        
-        //Check that name doesnt exist
-        if (pdObject.containsHome(homeName) && !replace) {
-            player.sendMessage(red + "Error: That home already exists! Remove it first or rerun with the -r flag!");
-            return true;
-        }
+        if (player.hasPermission("jawacommands.home.add")) { //Check if user has permission
+            PlayerDataObject pdObject = getPDO(player);
 
-        //Collect player location data
-        //Create home data
-        JSONObject topLevel = LocationDataHandler.createTopLevelHomeObject(player.getLocation(), homeName);
+            //Check that name doesnt exist
+            if (pdObject.containsHome(homeName) && !replace) {
+                player.sendMessage(red + "Error: That home already exists! Remove it first or rerun with the -r flag!");
+                return true;
+            }
 
-        boolean success = ESHandler.singleUpdateRequest(ESRequestBuilder.updateRequestBuilder(topLevel, "homes", player.getUniqueId().toString(), true));
+            //Collect player location data
+            //Create home data
+            JSONObject topLevel = LocationDataHandler.createTopLevelHomeObject(player.getLocation(), homeName);
 
-        if (success) {
-            player.sendMessage(green + homeName + " has been successfully saved!");
+            boolean success = ESHandler.singleUpdateRequest(ESRequestBuilder.updateRequestBuilder(topLevel, "homes", player.getUniqueId().toString(), true));
+
+            if (success) {
+                player.sendMessage(green + homeName + " has been successfully saved!");
+            } else {
+                player.sendMessage(red + homeName + " failed to be saved!");
+            }
         } else {
-            player.sendMessage(red + homeName + " failed to be saved!");
+            player.sendMessage(noPermission);
         }
         return true;
     }
@@ -85,22 +91,25 @@ public class HomeHandler {
      * @return 
      */
     public static boolean removeHome(Player player, String homeName) {
-        PlayerDataObject pdObject = getPDO(player);
-        
-        if (!pdObject.containsHome(homeName)) {
-            player.sendMessage(red + homeName + " is not in your home's list and cannot be removed!"  );
-            return true;
-        }
-        UpdateRequest request = ESRequestBuilder.requestFieldRemoval(player, homeName);
-        
-        boolean status = ESHandler.singleUpdateRequest(request);
-        
-        if (status == true) {
-            player.sendMessage(green + homeName + " has been successfully " + ChatColor.DARK_RED + " removed" + ChatColor.GREEN + "!");
+        if (player.hasPermission("jawacommands.home.del")) { //Check if user has permission
+            PlayerDataObject pdObject = getPDO(player);
+
+            if (!pdObject.containsHome(homeName)) {
+                player.sendMessage(red + homeName + " is not in your home's list and cannot be removed!");
+                return true;
+            }
+            UpdateRequest request = ESRequestBuilder.requestFieldRemoval(player, homeName);
+
+            boolean status = ESHandler.singleUpdateRequest(request);
+
+            if (status == true) {
+                player.sendMessage(green + homeName + " has been successfully " + ChatColor.DARK_RED + " removed" + ChatColor.GREEN + "!");
+            } else {
+                player.sendMessage(red + homeName + " failed to be deleted!");
+            }
         } else {
-            player.sendMessage(red + homeName + " failed to be deleted!");
+            player.sendMessage(noPermission);
         }
-        
         return true;
         
     }
@@ -110,15 +119,19 @@ public class HomeHandler {
      * @return 
      */
     public static boolean sendHomeList(Player player) {
-        Set homeList = getHomeList(player);
-        if (homeList != null){
-            player.sendMessage(green + "Your homes: " + ChatColor.WHITE + String.join(", ", Arrays.toString(homeList.toArray())));
-            return true;
+        if (player.hasPermission("jawacommands.home.list")) {
+            Set homeList = getHomeList(player);
+            if (homeList != null) {
+                player.sendMessage(green + "Your homes: " + ChatColor.WHITE + String.join(", ", Arrays.toString(homeList.toArray())));
+                return true;
+            } else {
+                player.sendMessage(red + "You don't have any homes set!");
+                return false;
+            }
         } else {
-            player.sendMessage(red + "You don't have any homes set!");
+            player.sendMessage(noPermission);
             return false;
         }
-        
     }
     
     /** Returns a Set containing the home names for a player. If a user has no homes
@@ -126,10 +139,14 @@ public class HomeHandler {
      * @param player
      * @return 
      */
-    public static Set getHomeList(Player player){
+    private static Set getHomeList(Player player){
         PlayerDataObject pdObject = getPDO(player);
-        if (pdObject.containsHomeData()) return pdObject.getHomeEntries();
-        else return null;
+        
+        if (pdObject.containsHomeData()){
+            Set homes = pdObject.getHomeEntries();
+            //if (player.getBedSpawnLocation() != null) homes.add("bed");
+            return homes;
+        } else return null;
     }
 
     /** Gets detailed and formatted home information for the player.
@@ -172,7 +189,7 @@ public class HomeHandler {
         
         if (pdObject.containsHome(homeName)) {
             player.sendMessage(ChatColor.GREEN + " > Welcome home.");
-            player.teleport(LocationDataHandler.unpackLocation(pdObject.getHome(homeName)));
+            player.teleport(LocationDataHandler.unpackLocation(pdObject.getHome(homeName)),PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else {
             return false;

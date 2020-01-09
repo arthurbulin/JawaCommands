@@ -17,10 +17,12 @@ commands:
   delhome:
     description: Used to delete a home
     permission: jawacommands.home.del
-    alias: [remhome]
   listhome:
     description: Lists a user's homes
     permission: jawacommands.home.list
+  sethome:
+    description: Set a users home
+    permission: jawacommands.home.add
   homeinfo:
     description: Provides a user with specific home information
     usage: /homeinfo <homename>
@@ -67,3 +69,17 @@ commands:
   fullbright:
     description: Gives you nightvision
     permission: jawacommands.fullbright
+  removespawn:
+    description: Removes a custom spawn
+    permission: jawacommands.spawn.remove
+  kit:
+    description: 'Used to create, modify, and give kits'
+    permission: jawacommands.kit.user
+    usage: 'See /kit -h for full instructions'
+  yeetport:
+    description: 'Yeets a player into the air before teleporting to a warp'
+    permission: jawacommands.yeetport
+  back:
+    description: 'sends you back to the last teleport location'
+    permission: jawacommands.back
+    

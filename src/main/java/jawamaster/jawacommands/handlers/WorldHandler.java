@@ -16,6 +16,10 @@
  */
 package jawamaster.jawacommands.handlers;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
 import org.bukkit.World;
 import org.json.JSONArray;
@@ -36,6 +40,7 @@ public class WorldHandler {
      * @return 
      */
     public static boolean isAllowedInWorld(World world, String section, String item){
+        // FIXME Build resolution to deal with worlds not already configured
         JSONObject worldConfiguration = JawaCommands.getWorldConfiguration().getJSONObject(world.getName());
         boolean isStrict = worldConfiguration.getBoolean("strict");
         if (worldConfiguration.keySet().contains(section)) {
@@ -122,5 +127,28 @@ public class WorldHandler {
         if (worldConfiguration.keySet().contains(world.getName()) && worldConfiguration.getJSONObject(world.getName()).keySet().contains(section)){
             return worldConfiguration.getJSONObject(world.getName()).getInt(section);
         } else return -1;
+    }
+    
+    /** Loads custom spawn points for the worlds and returns them as a HashMap<String,JSONObject>.
+     * If the worldspawns.txt doesn't exist or is empty it will return an empty map.
+     * @return 
+     */
+    public static JSONObject loadWorldSpawns(){
+        JSONObject spawnJSON = new JSONObject();
+        File worldspawns = new File(JawaCommands.getPlugin().getDataFolder() + "/worldspawns.json");
+
+        if (worldspawns.exists()){ //Load the jsonobject
+            spawnJSON = JSONHandler.LoadJSONConfig("/worldspawns.json");
+            if (spawnJSON == null) { //verify that the JSONHandler could load the data in the file.
+                Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "Unable to load custom spawn points even though a file exists, it may just be empty.");
+                return spawnJSON;
+            }
+            Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "Loading custom spawn points.");
+            return spawnJSON;
+            
+        } else { //No file exists, this is ok
+            Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "No custom spawn points exist.");
+            return spawnJSON;
+        }
     }
 }

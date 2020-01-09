@@ -16,9 +16,13 @@
  */
 package jawamaster.jawacommands.commands.development;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 /**
  *
@@ -28,7 +32,28 @@ public class BackCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+        //Get user's backStack
+        //send user to back location
+        //remove location from backStack
+        Player target;
+        if (commandSender instanceof Player){
+            target = (Player) commandSender;
+        } else {
+            System.out.println("Error: Only a player may user the /back command.");
+            return true;
+        }
+        Location topBack = BackHandler.getUserBackLocation(target);
         
+        if (topBack == null){
+            target.sendMessage(ChatColor.RED + "> Error: You do not have any back locations!!");
+        } else {
+            target.sendMessage(ChatColor.GREEN + " > Sending you back.");
+            //Block block = topBack.getWorld().getHighestBlockAt(topBack);
+            
+            topBack.setY(topBack.getWorld().getHighestBlockYAt(topBack));
+            target.teleport(topBack,PlayerTeleportEvent.TeleportCause.UNKNOWN);
+            BackHandler.removeUserBackLocation(target);
+        }
         
         return true;
     }

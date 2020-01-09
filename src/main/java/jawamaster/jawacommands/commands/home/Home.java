@@ -75,6 +75,10 @@ public class Home implements CommandExecutor{
                     HomeHandler.removeHome(player, args[1]);
                 } //-s set
                 else if (args[0].equals("-s") || args[0].equals("s")) {
+                    if (args[1].equalsIgnoreCase("bed")) {
+                        commandSender.sendMessage(ChatColor.DARK_RED + " > You cannot set a bed home. You must sleep in a bed to do so.");
+                        return true;
+                    }
                     if (WorldHandler.isAllowedInWorld(player.getWorld(), "homes") || player.hasPermission("homes.admin.override")) HomeHandler.addHome(player, args[1], false);
                     else player.sendMessage(ChatColor.RED + " > You are not allwoed to add homes in this world.");
                 } //-sr set and replace

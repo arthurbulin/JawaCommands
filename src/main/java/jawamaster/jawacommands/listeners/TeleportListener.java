@@ -16,8 +16,7 @@
  */
 package jawamaster.jawacommands.listeners;
 
-import jawamaster.jawacommands.handlers.LocationDataHandler;
-import jawamaster.jawacommands.handlers.WorldHandler;
+import jawamaster.jawacommands.commands.development.BackHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,14 +31,16 @@ public class TeleportListener implements Listener {
     @EventHandler
     public void onPlayerTeleportEvent(PlayerTeleportEvent teleportEvent) {
         Player player = teleportEvent.getPlayer();
-        boolean isBackAllowed = WorldHandler.isAllowedInWorld(teleportEvent.getFrom().getWorld(), "back");
+        //boolean isBackAllowed = WorldHandler.isAllowedInWorld(teleportEvent.getFrom().getWorld(), "back");
+        boolean isBackAllowed = BackHandler.backAllowedInWorld();
         
         // If player has permmission to do back
         if ((isBackAllowed && player.hasPermission("jawacommands.back")) || player.hasPermission("jawacommands.back.admin")){
             // Is teleport type valid
-            if (teleportEvent.getCause() != PlayerTeleportEvent.TeleportCause.UNKNOWN) {
+            if (teleportEvent.getCause() != PlayerTeleportEvent.TeleportCause.UNKNOWN && (teleportEvent.getCause() != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)) {
                 //if yes commit location to stack (location handler)
-                LocationDataHandler.addToBackStack(player, teleportEvent.getFrom());
+                //LocationDataHandler.addToBackStack(player, teleportEvent.getFrom());
+                BackHandler.addUserBackLocation(player, teleportEvent.getFrom());
             }
                 //if no ignore
         } //else nothing happens

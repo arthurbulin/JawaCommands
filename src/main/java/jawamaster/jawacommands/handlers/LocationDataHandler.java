@@ -16,14 +16,10 @@
  */
 package jawamaster.jawacommands.handlers;
 
-import java.util.UUID;
-import jawamaster.jawacommands.JawaCommands;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -97,56 +93,56 @@ public class LocationDataHandler {
         }
         
     }
-    
-    public static void addToBackStack(Player player, Location location){
-        JSONObject playerBackData = JawaCommands.getBackStack(player.getUniqueId());
-        
-        if (playerBackData.isEmpty()){
-            playerBackData = generateEmptyStack();
-        }
-        
-        JSONArray worldStack = playerBackData.getJSONArray(location.getWorld().getName());
-        
-        if ( worldStack.length() < WorldHandler.getConfigNumber(location.getWorld(), "back count")){ //if less than the limit
-            worldStack.put(location);
-        } else { // if greater than the limit
-            JSONArray newWorldStack = new JSONArray(); //
-            
-            worldStack.remove(worldStack.length()-1);
-            newWorldStack.put(location);
-            
-            worldStack.forEach((loc) -> {
-                newWorldStack.put(loc);
-            });
-        }
-    }
-    
-    public static JSONObject generateEmptyStack(){
-        JSONObject obj = new JSONObject();
-        
-        JawaCommands.getPlugin().getServer().getWorlds().forEach((world) -> {
-            obj.put(world.getName(), new JSONArray());
-        });
-        
-        return obj;
-    }
-    
-    public static void removeFromStack(Player player){
-        JSONObject playerBackData = JawaCommands.getBackStack(player.getUniqueId());
-        if (!playerBackData.isEmpty()){
-            JSONArray worldStack = playerBackData.getJSONArray(player.getWorld().getName());
-        } else {
-            player.sendMessage(ChatColor.RED + " > You do not have any valid back locations!");
-        }
-    }
-    
-    public static void sendPlayerBack(Player player){
-        JSONObject playerBackData = JawaCommands.getBackStack(player.getUniqueId());
-        if (!playerBackData.isEmpty()){
-            JSONArray worldStack = playerBackData.getJSONArray(player.getWorld().getName());
-        } else {
-            player.sendMessage(ChatColor.RED + " > You do not have any valid back locations!");
-        }
-    }
+//    
+//    public static void addToBackStack(Player player, Location location){
+//        JSONObject playerBackData = JawaCommands.getBackStack(player.getUniqueId());
+//        
+//        if (playerBackData.isEmpty()){
+//            playerBackData = generateEmptyStack();
+//        }
+//        
+//        JSONArray worldStack = playerBackData.getJSONArray(location.getWorld().getName());
+//        
+//        if ( worldStack.length() < WorldHandler.getConfigNumber(location.getWorld(), "back count")){ //if less than the limit
+//            worldStack.put(location);
+//        } else { // if greater than the limit
+//            JSONArray newWorldStack = new JSONArray(); //
+//            
+//            worldStack.remove(worldStack.length()-1);
+//            newWorldStack.put(location);
+//            
+//            worldStack.forEach((loc) -> {
+//                newWorldStack.put(loc);
+//            });
+//        }
+//    }
+//    
+//    public static JSONObject generateEmptyStack(){
+//        JSONObject obj = new JSONObject();
+//        
+//        JawaCommands.getPlugin().getServer().getWorlds().forEach((world) -> {
+//            obj.put(world.getName(), new JSONArray());
+//        });
+//        
+//        return obj;
+//    }
+//    
+//    public static void removeFromStack(Player player){
+//        JSONObject playerBackData = JawaCommands.getBackStack(player.getUniqueId());
+//        if (!playerBackData.isEmpty()){
+//            JSONArray worldStack = playerBackData.getJSONArray(player.getWorld().getName());
+//        } else {
+//            player.sendMessage(ChatColor.RED + " > You do not have any valid back locations!");
+//        }
+//    }
+//    
+//    public static void sendPlayerBack(Player player){
+//        JSONObject playerBackData = JawaCommands.getBackStack(player.getUniqueId());
+//        if (!playerBackData.isEmpty()){
+//            JSONArray worldStack = playerBackData.getJSONArray(player.getWorld().getName());
+//        } else {
+//            player.sendMessage(ChatColor.RED + " > You do not have any valid back locations!");
+//        }
+//    }
     
 }

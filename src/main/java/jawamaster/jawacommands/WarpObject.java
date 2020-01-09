@@ -23,6 +23,7 @@ import java.util.UUID;
 import jawamaster.jawacommands.handlers.LocationDataHandler;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -275,8 +276,13 @@ public class WarpObject {
 //###############################################################################
     
     public boolean sendPlayer(Player target){
-        if (playerCanVisit(target)){
-            target.teleport(location);
+        return sendPlayer(target, false);
+        
+    }
+    
+    public boolean sendPlayer(Player target, boolean override){
+        if (override || playerCanVisit(target)){
+            target.teleport(location,PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else {
             return false;

@@ -16,12 +16,16 @@
  */
 package jawamaster.jawacommands.commands.spawn;
 
+import jawamaster.jawacommands.JawaCommands;
+import jawamaster.jawacommands.handlers.LocationDataHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.json.JSONObject;
 
 /**
  *
@@ -42,10 +46,19 @@ public class Spawn implements CommandExecutor{
         }
         
         if ((args == null) || (args.length == 0)) {
+            if (JawaCommands.worldSpawns.has(player.getWorld().getName())) {
+                JSONObject worldSpawns = JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName());
+                for (String perm : worldSpawns.keySet()) {
+                    if (player.hasPermission("jawacommands.spawn." + perm)) {
+                        player.teleport(LocationDataHandler.unpackLocation(JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
+                        break;
+                    }
+                }
+            }
             player.teleport(player.getWorld().getSpawnLocation());
             player.sendMessage(ChatColor.DARK_GREEN + " > Spawning you in " + player.getWorld().getName());
         } else if ((args.length > 0) && player.hasPermission("jawacommands.spawn." + args[0])){
-            player.teleport(Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
+            player.teleport(Bukkit.getServer().getWorld(args[0]).getSpawnLocation(),PlayerTeleportEvent.TeleportCause.COMMAND);
         } else {
             player.sendMessage(ChatColor.RED + " > You do not have permission to spawn in this world!");
         }

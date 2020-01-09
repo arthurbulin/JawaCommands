@@ -21,6 +21,7 @@ package jawamaster.jawacommands.commands.warps;
 import java.util.Arrays;
 import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.handlers.WarpHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -42,7 +43,19 @@ public class Warp implements CommandExecutor{
             boolean worked = JawaCommands.getWarpIndex().get(args[0]).sendPlayer((Player) commandSender);
             if (worked) commandSender.sendMessage(ChatColor.GREEN + " > Warping!");
             else commandSender.sendMessage(ChatColor.RED + " > You don't have access to that!");
-        } else {
+        } else if(args.length == 2) {
+            if (commandSender.hasPermission("jawacommands.warp.other") && JawaCommands.getWarpIndex().containsKey(args[0])){
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target != null){
+                    boolean worked = JawaCommands.getWarpIndex().get(args[0]).sendPlayer(target);
+                } else {
+                    commandSender.sendMessage(ChatColor.RED + " > Error: That is not a valid player!");
+                }
+            } else if(!commandSender.hasPermission("jawacommands.warp.other")){
+                commandSender.sendMessage(ChatColor.RED + " > Error: You do not have permission to warp another player!");
+            }
+        }
+        else {
             commandSender.sendMessage(ChatColor.RED + " > Too many arguments!");
         }
         
