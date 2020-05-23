@@ -14,26 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jawamaster.jawacommands.listeners;
+package jawamaster.jawacommands.commands;
 
-import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.handlers.FreezeHandler;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 
 /**
  *
  * @author alexander
  */
-public class PlayerQuit implements Listener{
-    @EventHandler
-    public static void onPlayerQuit(PlayerQuitEvent event) {
-        //TODO move this into the static BackHandler
-        if (JawaCommands.backStack.containsKey(event.getPlayer().getUniqueId())){
-            JawaCommands.backStack.remove(event.getPlayer().getUniqueId());
+public class Colors implements CommandExecutor{
+
+    @Override
+    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+        
+        commandSender.sendMessage(ChatColor.GREEN + " > Server chat color codes as they are in the code:");
+        for (ChatColor color : ChatColor.values()){
+            commandSender.sendMessage(ChatColor.GREEN + " > " + color + color.name() + ChatColor.WHITE + ": " + color.getChar());
         }
-        FreezeHandler.playerQuit(event.getPlayer());
+            
+        return true;
+        
     }
+    
     
 }

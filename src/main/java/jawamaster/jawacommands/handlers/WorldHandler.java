@@ -16,8 +16,8 @@
  */
 package jawamaster.jawacommands.handlers;
 
+import net.jawasystems.jawacore.handlers.JSONHandler;
 import java.io.File;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
@@ -29,6 +29,8 @@ import org.json.JSONObject;
  *
  * @author alexander
  */
+
+//TODO this whole thing is a mess
 public class WorldHandler {
     
     /** Checks the /plugin/worlds.json file to see if certain actions are allowed or not
@@ -111,10 +113,10 @@ public class WorldHandler {
     }
     
     public static JSONObject LoadWorldConfigs(){
-        JSONObject worldConfigs = JSONHandler.LoadJSONConfig("/worlds.json");
+        JSONObject worldConfigs = JSONHandler.LoadJSONConfig(JawaCommands.getPlugin(), "/worlds.json");
         if (worldConfigs == null){
             worldConfigs = generateWorldConfigs();
-            JSONHandler.WriteJSONToFile("/worlds.json", worldConfigs);
+            JSONHandler.WriteJSONToFile(JawaCommands.getPlugin(),"/worlds.json", worldConfigs);
         }
         
         System.out.println("[JawaCommands][WorldHandler] " + worldConfigs.length() + " worlds have been configured and loaded for configuration management");
@@ -138,7 +140,7 @@ public class WorldHandler {
         File worldspawns = new File(JawaCommands.getPlugin().getDataFolder() + "/worldspawns.json");
 
         if (worldspawns.exists()){ //Load the jsonobject
-            spawnJSON = JSONHandler.LoadJSONConfig("/worldspawns.json");
+            spawnJSON = JSONHandler.LoadJSONConfig(JawaCommands.getPlugin(),"/worldspawns.json");
             if (spawnJSON == null) { //verify that the JSONHandler could load the data in the file.
                 Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "Unable to load custom spawn points even though a file exists, it may just be empty.");
                 return spawnJSON;

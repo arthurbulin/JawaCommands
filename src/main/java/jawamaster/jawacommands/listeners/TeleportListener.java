@@ -17,33 +17,27 @@
 package jawamaster.jawacommands.listeners;
 
 import jawamaster.jawacommands.commands.development.BackHandler;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-/**
- *
- * @author alexander
+/** This listener access if a user teleport event should be added to the back stack.
+ * This allows a user teleport event to have the location saved in the /back stack.
+ * @author Jawamaster (Arthur Bulin)
  */
 public class TeleportListener implements Listener {
 
     @EventHandler
-    public void onPlayerTeleportEvent(PlayerTeleportEvent teleportEvent) {
-        Player player = teleportEvent.getPlayer();
-        //boolean isBackAllowed = WorldHandler.isAllowedInWorld(teleportEvent.getFrom().getWorld(), "back");
-        boolean isBackAllowed = BackHandler.backAllowedInWorld();
-        
+    public void onPlayerTeleportEvent(PlayerTeleportEvent event) {
+
         // If player has permmission to do back
-        if ((isBackAllowed && player.hasPermission("jawacommands.back")) || player.hasPermission("jawacommands.back.admin")){
-            // Is teleport type valid
-            if (teleportEvent.getCause() != PlayerTeleportEvent.TeleportCause.UNKNOWN && (teleportEvent.getCause() != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)) {
+        if ((BackHandler.backAllowedInWorld(event.getPlayer(), event.getFrom().getWorld()) && event.getPlayer().hasPermission(BackHandler.BACKPERMISSION)) || event.getPlayer().hasPermission(BackHandler.ADMINBACKPERMISSION)){
+            // Ignore UNKNOWN and NETHER_PORTAL causes and exclude them from the back stack
+            if (event.getCause() != PlayerTeleportEvent.TeleportCause.UNKNOWN && (event.getCause() != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)) {
                 //if yes commit location to stack (location handler)
-                //LocationDataHandler.addToBackStack(player, teleportEvent.getFrom());
-                BackHandler.addUserBackLocation(player, teleportEvent.getFrom());
+                BackHandler.addUserBackLocation(event.getPlayer(), event.getFrom());
             }
-                //if no ignore
-        } //else nothing happens
+        } 
         
     }
 }

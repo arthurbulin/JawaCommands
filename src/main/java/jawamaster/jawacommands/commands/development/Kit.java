@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import jawamaster.jawacommands.handlers.KitHandler;
-import jawamaster.jawapermissions.utils.ArgumentParser;
+import net.jawasystems.jawacore.utils.ArgumentParser;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -43,13 +43,13 @@ public class Kit implements CommandExecutor {
                 KitHandler.sendHelpMessage(commandSender);
                 return true;
             } else if (args[0].equalsIgnoreCase("-l") && commandSender.hasPermission("jawacommands.kit.user")){
-                KitHandler.listKits(commandSender);
+                KitHandler.listKits(commandSender, null);
                 return true;
             } else {
                 commandSender.sendMessage(ChatColor.RED + " Error: That flag is not understood!");
                 return true;
             }
-        }
+        } 
         
         
         /*args: 
@@ -59,9 +59,9 @@ public class Kit implements CommandExecutor {
         -f: add flags - <flag> [flag options]
         -h: display help
         -r: remove a kit - <kit name>
-        -d: disable a kit <kit name>
+        -d: description - <kit name> <description>
         */
-        HashSet<String> acceptedArgs = new HashSet(Arrays.asList("c","m","i","f","h","g"));
+        HashSet<String> acceptedArgs = new HashSet(Arrays.asList("c","m","i","f","h","g","r","l"));
         
         HashMap<String, String> parsedArgs = ArgumentParser.getArgumentValues(args);
         
@@ -70,10 +70,20 @@ public class Kit implements CommandExecutor {
             return true;
         }
         
+        String kitName;
+        if (parsedArgs.containsKey("l")){
+            kitName = parsedArgs.get("l");
+            KitHandler.listKits(commandSender, kitName);
+            return true;
+        }
         if (parsedArgs.containsKey("g")){
-            String kitName = parsedArgs.get("g");
+            kitName = parsedArgs.get("g").split(" ")[0];
             String[] players = Arrays.copyOfRange(parsedArgs.get("g").split(" "),1,parsedArgs.get("g").split(" ").length);
-            KitHandler.giveKit(commandSender, kitName, players);
+            KitHandler.givePlayersKit(commandSender, kitName, players);
+            return true;
+        }
+        if (parsedArgs.containsKey("r")){
+            boolean removed = KitHandler.removeKit(parsedArgs.get("r"), commandSender);
             return true;
         }
         
@@ -86,7 +96,6 @@ public class Kit implements CommandExecutor {
                 return true;
         }
         
-        String kitName;
         boolean created;
         if (parsedArgs.containsKey("c")) {
             created = KitHandler.createKit(parsedArgs.get("c"), commandSender);
@@ -96,19 +105,18 @@ public class Kit implements CommandExecutor {
         } else if (parsedArgs.containsKey("m")){
             kitName = parsedArgs.get("m");
         } else {
-            commandSender.sendMessage(ChatColor.RED + " > Error: You must specify a kit argument: -c,m,g");
+            commandSender.sendMessage(ChatColor.RED + " > Error: You must specify a kit argument: -c,m,g,r");
             return true;
         }
         
         
         if (parsedArgs.containsKey("i")){
-            boolean modifiedItems = KitHandler.modifyKitItems(kitName, parsedArgs.get("i"), commandSender);
-            if (!modifiedItems) return true;
+            KitHandler.modifyKitItems(kitName, parsedArgs.get("i"), commandSender);
+        } else if (parsedArgs.containsKey("f")){
+            KitHandler.modifyKitFlags(kitName, parsedArgs.get("f"), commandSender);
         }
-        if (parsedArgs.containsKey("f")){
-            boolean modifiedFlags = KitHandler.modifyKitFlags(kitName, parsedArgs.get("f"), commandSender);
-            if (!modifiedFlags) return true;
-        }
+        
+        
         
         
         return true;

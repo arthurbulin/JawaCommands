@@ -17,8 +17,12 @@
 package jawamaster.jawacommands.commands.development;
 
 import jawamaster.jawacommands.JawaCommands;
+import jawamaster.jawacommands.handlers.TPHandler;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.json.JSONArray;
 
 /**
@@ -26,7 +30,12 @@ import org.json.JSONArray;
  * @author alexander
  */
 public class BackHandler {
-    
+    public static final String BACKPERMISSION = "jawacommands.back";
+    public static final String ADMINBACKPERMISSION = "jawacommands.back.admin";
+    /** Add a location to the user's back stack.
+     * @param target
+     * @param loc 
+     */
     public static void addUserBackLocation(Player target, Location loc){
         if (JawaCommands.backStack.containsKey(target.getUniqueId())){
             JawaCommands.backStack.get(target.getUniqueId()).put(loc);
@@ -37,6 +46,9 @@ public class BackHandler {
         }
     }
     
+    /** Remove a location from ther user's back stack.
+     * @param target 
+     */
     public static void removeUserBackLocation(Player target) {
         if (JawaCommands.backStack.get(target.getUniqueId()).length() == 1) {
             JawaCommands.backStack.remove(target.getUniqueId());
@@ -46,6 +58,10 @@ public class BackHandler {
         }
     }
     
+    /** Get a back location from the top of the stack.
+     * @param target
+     * @return 
+     */
     public static Location getUserBackLocation(Player target){
         if (JawaCommands.backStack.containsKey(target.getUniqueId())){
             return (Location) JawaCommands.backStack.get(target.getUniqueId()).get(JawaCommands.backStack.get(target.getUniqueId()).length()-1);
@@ -54,10 +70,28 @@ public class BackHandler {
         }
     }
     
+    /** Returns true if /back is allowed in a world for users. This checks the permission
+     * of the format 'jawacommands.back.WORLD' and if the user has that permission it
+     * returns true.
+     * @return 
+     */
+    public static boolean backAllowedInWorld(Player target, World world){
+        if (target.hasPermission(BACKPERMISSION + "." + world.getName())){
+            return true;
+        } else return false;
+    }
     
-    public static boolean backAllowedInWorld(){
-        //TODO fix this
-        return true;
+    /** Sends a player to their top back location using safe freezing teleportation.
+     * @param target
+     * @param topBack 
+     */
+    public static void sendBack(Player target, Location topBack){
+        if (topBack.getWorld().getBlockAt(topBack).getType().equals(Material.AIR)) {
+            topBack.setY(topBack.getWorld().getHighestBlockYAt(topBack));
+        }
+        
+        TPHandler.performSafeTeleport(target, topBack, PlayerTeleportEvent.TeleportCause.UNKNOWN);
+        BackHandler.removeUserBackLocation(target);
     }
     
     

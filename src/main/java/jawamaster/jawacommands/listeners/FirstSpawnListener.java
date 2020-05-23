@@ -17,13 +17,14 @@
 package jawamaster.jawacommands.listeners;
 
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.handlers.LocationDataHandler;
+import net.jawasystems.jawacore.handlers.LocationDataHandler;
 import jawamaster.jawapermissions.JawaPermissions;
+import net.jawasystems.jawacore.PlayerManager;
+import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.json.JSONObject;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 /**
@@ -35,20 +36,21 @@ public class FirstSpawnListener implements Listener {
     @EventHandler
     public void onPlayerSpawnLocationEvent(PlayerSpawnLocationEvent event) {
         Player player = event.getPlayer();
+        PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
         World world = event.getPlayer().getWorld();
 
-        System.out.println("onPlayerSpawnLocationEvent");
-        System.out.println("player:" + event.getPlayer().getName() + " world:"+event.getPlayer().getWorld());
-        System.out.println("has player played before: "+ player.hasPlayedBefore());
-        System.out.println("world has custom spawn: " + JawaCommands.worldSpawns.has(world.getName()));
+        //player, world, bed, custom
+        //System.out.println("onPlayerSpawnLocationEvent Player: " + event.getPlayer().getName() 
+         //       + ","+world.getName() 
+           //     + ","+ player.getBedSpawnLocation()
+             //   + "," + JawaCommands.worldSpawns.has(world.getName()));
         
         //If player is new and there is an applicaple place in the world
 //        if (!player.hasPlayedBefore() && JawaCommands.worldSpawns.has(world.getName())) {
         //If world has spawn set AND if worldspawn has one named after their rank, send them to the one named after their rank
         if (JawaCommands.worldSpawns.has(world.getName()) 
-                && !player.hasPlayedBefore()
-                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(JawaPermissions.playerRank.get(player.getUniqueId())) 
-                && event.getSpawnLocation().equals(world.getSpawnLocation())) {
+                && player.getBedSpawnLocation() == null
+                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank())) {
             //if that world has spawns
             //if that world has a spawn named that rank
             //if the player spawn location equals the world default spawn
@@ -59,7 +61,8 @@ public class FirstSpawnListener implements Listener {
 //                if (player.hasPermission("jawacommands.spawn." + perm)) {
 //                    System.out.println("user has that permission");
                     event.setSpawnLocation(LocationDataHandler.unpackLocation(
-                            JawaCommands.worldSpawns.getJSONObject(world.getName()).getJSONObject(JawaPermissions.playerRank.get(player.getUniqueId()))));
+                            JawaCommands.worldSpawns.getJSONObject(world.getName()).getJSONObject(pdObject.getRank())));
+                            
 //                    break;
 //                } else {
 //                    System.out.println("user doesn't have that permission");

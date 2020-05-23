@@ -17,15 +17,18 @@
 package jawamaster.jawacommands.handlers;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
+import jawamaster.jawacommands.JawaCommands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -35,13 +38,15 @@ public class TPHandler {
 
     static Map<String, String> currentTPRequest = new HashMap<String, String>();
     static Map<String, String> currentSummonRequest = new HashMap<String, String>();
+    static HashMap<UUID, Integer> playerTPTask = new HashMap();
+    private static HashSet<Player> safeTeleport = new HashSet();
     public static long keepAlive = 1200;
     public static long coolDown = 1200;
 
     //Person the request is being sent to is the target
     public static void tpRequest(int type, Player player, Player target) {
-        String playerName = ChatColor.translateAlternateColorCodes('$', player.getDisplayName());
-        String targetName = ChatColor.translateAlternateColorCodes('$', target.getDisplayName());
+        String playerName = ChatColor.translateAlternateColorCodes('&', player.getDisplayName());
+        String targetName = ChatColor.translateAlternateColorCodes('&', target.getDisplayName());
         player.sendMessage(ChatColor.DARK_GREEN + " > Sending request to " + targetName);
 
         if (type == 0) { //To tpa to a player
@@ -100,20 +105,98 @@ public class TPHandler {
         return loc;
     }
 
-    public static boolean blockCheck(Location loc) {
-        Block block = loc.getWorld().getHighestBlockAt(loc);
-
-        Material type = block.getType();
-
-        if ((type == Material.LAVA) || (type == Material.WATER)
-                || (type == Material.AIR) || (type == Material.WATER)
-                || (type == Material.LAVA) || (type == Material.CACTUS)
-                || (type == Material.MAGMA_BLOCK)) {
-
-            return false;
-        } else {
-            return true;
+    public static boolean safeToTP(Location loc) {
+        //Block block = loc.getWorld().getHighestBlockAt(loc);
+        Block blk = loc.getBlock();
+        boolean safe = true;
+        if (!blk.isPassable() || blk.isLiquid()) {
+            safe = false;
         }
+        Block blkD = loc.subtract(0, 1, 0).getBlock();
+        if (blkD.isPassable() || blkD.isLiquid() || blkD.isEmpty()) {
+            safe = false;
+        }
+        
+        //System.out.print("Block is safe. Block:" + blk.getType().name());
+        return safe;
+        //Material type = block.getType();
+
+        
+//        Block feet = location.getBlock();
+//        if (!feet.getType().isTransparent() && !feet.getLocation().add(0, 1, 0).getBlock().getType().isTransparent()) {
+//            return false; // not transparent (will suffocate)
+//        }
+//        Block head = feet.getRelative(BlockFace.UP);
+//        if (!head.getType().isTransparent()) {
+//            return false; // not transparent (will suffocate)
+//        }
+//        Block ground = feet.getRelative(BlockFace.DOWN);
+//        if (!ground.getType().isSolid()) {
+//            return false; // not solid
+//        }
+//        return true;
+    
+//        if ((type == Material.LAVA) || (type == Material.WATER)
+//                || (type == Material.AIR)
+//                || (type == Material.LAVA)
+//                || (type == Material.CACTUS)
+//                || (type == Material.MAGMA_BLOCK)) {
+//
+//            return false;
+//        } else {
+//            return true;
+//        }
+    }
+    
+    /** Performs a teleport that tries to keep the player from falling through the ground
+     * by freezing them in place for 5 seconds and sets their velocity to 0 in all
+     * vectors.
+     * @param target
+     * @param loc 
+     * @param cause 
+     */
+    public static void performSafeTeleport(Player target, Location loc, PlayerTeleportEvent.TeleportCause cause) {
+        
+        //Inform the target of freezing
+        if (JawaCommands.getConfiguration().getBoolean("safe-tp-messages", true)) {
+            target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-freeze", "&e> You are being frozen for teleport.")));
+            //target.sendMessage(ChatColor.GREEN + "> You are being frozen for teleport.");
+        }
+
+        //Teleport the player
+        target.teleport(loc, cause);
+        
+        //Cancel all velocity if need be
+        target.setVelocity(new Vector(0, 0, 0));
+        
+        //Freeze them
+        safeTeleport.add(target);
+
+        Bukkit.getServer().getScheduler().runTaskLater(JawaCommands.getPlugin(), () -> {
+            //Unfreeze the player
+            safeTeleport.remove(target);
+            if (JawaCommands.getConfiguration().getBoolean("safe-tp-messages", true)) {
+                target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-thaw", "&e> You have been thawed.")));
+                //target.sendMessage(ChatColor.GREEN + "> You have been thawed.");
+            }
+            
+        }, 100);
+    }
+    
+    /** Performs a teleport that tries to keep the player from falling through the ground
+     * by freezing them in place for 5 seconds and sets their velocity to 0 in all
+     * vectors. This will teleport with the cause COMMAND. This is backed by 
+     * performSageTeleport(Player, Location, TeleportCause).
+     * @param target
+     * @param loc 
+     */
+    public static void performSafeTeleport(Player target, Location loc) {
+        performSafeTeleport(target, loc, PlayerTeleportEvent.TeleportCause.COMMAND);
+        
+    }
+    
+    public static boolean safeTP(Player player){
+        return safeTeleport.contains(player);
     }
 
 }

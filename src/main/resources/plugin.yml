@@ -1,28 +1,14 @@
 name: JawaCommands
 main: jawamaster.jawacommands.JawaCommands
-version: 1.0
-depends: JawaPermissions
+description: "A command plugin to make minecraft a little more user friendly"
+version: 1.1
+api-version: 1.15
+depends: JawaPermissions, JawaCore
 commands:
   home:
     description: Used for home control.
     usage: /home <-[d|sr|s|i|l|h]> <homename>
     permission: jawacommands.home
-  sethome:
-    description: Used to set the player's home positions
-    permission: jawacommands.home.set
-    alias: [addhome]
-  commandtest:
-    description: Jawacommands test command
-    permission: jawacommands
-  delhome:
-    description: Used to delete a home
-    permission: jawacommands.home.del
-  listhome:
-    description: Lists a user's homes
-    permission: jawacommands.home.list
-  sethome:
-    description: Set a users home
-    permission: jawacommands.home.add
   homeinfo:
     description: Provides a user with specific home information
     usage: /homeinfo <homename>
@@ -34,7 +20,7 @@ commands:
     description: Warps a player to a specified warp.
     permission: warps.warp
   makewarp:
-    description: Creates a warp.
+    description: 'Creates a warp.'
     permission: warps.admin.create
   modwarp:
     description: Modifies a warp.
@@ -75,11 +61,100 @@ commands:
   kit:
     description: 'Used to create, modify, and give kits'
     permission: jawacommands.kit.user
-    usage: 'See /kit -h for full instructions'
+    usage: '/kit -h for full instructions'
   yeetport:
     description: 'Yeets a player into the air before teleporting to a warp'
     permission: jawacommands.yeetport
   back:
     description: 'sends you back to the last teleport location'
     permission: jawacommands.back
+  colors:
+    description: 'sends a message to the player containing all of the color names and char codes as they appear in the code'
+    usage: '/colors'
+  testcommand:
+    description: Does whatever whenever i use it
+    usage: test usage
+  tpr:
+    description: Randomly teleports a target
+    usage: '/tpr [target]'
+  freeze:
+    description: "Freezes a player's motion preventing them from moving"
+    usage: "/freeze <player>"
+    permission: jawacommands.freeze
     
+permissions:
+  jawacommands.back:
+      description: Allows back command
+      default: true
+  jawacommands.yeetport:
+      description: Allows a player to trugger a yeetport
+      default: op
+  jawacommands.kit.user:
+      description: Allows a user to use the kit command
+      default: false
+  jawacommands.spawn.remove:
+      description: Allows a user to remove a spawn
+      default: false
+  jawacommands.fullbright:
+      description: Allows a user to use fullbright
+      default: true
+  jawacommands.accept:
+      description: Allows a user to accept tp requests
+      default: true
+  jawacommands.comehere:
+      description: Allows a user to ask a player to teleport to them
+      default: true
+  jawacommands.gothere:
+      description: Allows a user to ask a player if they can teleport to them
+      default: true
+  jawacommands.setspawn:
+      description: Allows an admin to create a specific spawn
+      default: true
+  jawacommands.spawn:
+      description: Allows a user to go to spawn
+      default: true
+  gamemode.toggle:
+      description: Allows a user to toggle between gamemodes
+      default: true
+  warps.admin.bl:
+      description: Allows an admin to add a black list to a warp
+      default: op
+  warps.admin.wl:
+      description: Allows an admin to add a white list to a warp
+      default: op
+  warps.admin.delete:
+      description: Allows an admin to delete a warp
+      default: op
+  warps.admin.mod:
+      description: Allows an admin to add modify a warp
+      default: op
+  warps.admin.create:
+      description: Allows an admin to create a warp
+      default: op
+  warps.warp:
+      description: Allows a player to list warps they can see and visit them
+      default: true
+  jawacommands.sudo:
+      description: Allows an admin to force a player to run a command
+      default: op
+  jawacommands.home.info:
+      description: Allows an player to see their home info
+      default: true
+  jawacommands.home.add:
+      description: Allows an player to add a home
+      default: true
+  jawacommands.home.list:
+      description: Allows an player to list their homes
+      default: true
+  jawacommands.home.del:
+      description: Allows an player to delete a home
+      default: true
+  jawacommands.home.set:
+      description: Allows an player to set homes
+      default: true
+  jawacommands.home:
+      description: Allows an player to access the generalized home command
+      default: true
+  jawacommands.freeze:
+      description: Allows an admin to freeze or thaw a player with the freeze command
+      default: op

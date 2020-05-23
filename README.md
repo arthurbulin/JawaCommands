@@ -82,7 +82,15 @@ permission: warps.admin.bl
 
 gm:
 description: Changes a player's game mode.
-permission: gamemode.toggle
+permissions: 
+```
+gamemode.creative - Allows a player to set their gamemode to creative
+gamemode.survival - Allows a player to set their gamemode to survival
+gamemode.adventure - Allows a player to set their gamemode to adventure
+gamemode.spectator - Allows a player to set their gamemode to spectator
+gamemode.admin.other - Allows a player to set the gamemore of another player (The above permissions, or lack of, are respected for the target)
+gamemode.admin.override - Allows a player to override the gamemode permissions of a target.
+```            
 
 spawn:
 description: Send a player to the corresponding world's spawn

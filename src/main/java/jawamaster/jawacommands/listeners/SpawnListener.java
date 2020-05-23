@@ -17,8 +17,10 @@
 package jawamaster.jawacommands.listeners;
 
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.handlers.LocationDataHandler;
+import net.jawasystems.jawacore.handlers.LocationDataHandler;
 import jawamaster.jawapermissions.JawaPermissions;
+import net.jawasystems.jawacore.PlayerManager;
+import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,25 +32,27 @@ import org.json.JSONObject;
  *
  * @author alexander
  */
-public class SpawnListener implements Listener {
+public class SpawnListener implements Listener {    
     
     @EventHandler
     public void onPayerRespawnEvent(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
+        PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
         World world = event.getPlayer().getWorld();
-        
-        System.out.println("onPlayerRespawnEvent. player:" + event.getPlayer().getName() + " world: "+event.getPlayer().getWorld() + " player has bed: "+ player.getBedSpawnLocation() + " world has custom spawn: " + JawaCommands.worldSpawns.has(world.getName()));
+        //"player, world, bed, customspawn"
+        //System.out.println("onPlayerRespawnEvent." + event.getPlayer().getName() + ","+event.getPlayer().getWorld() + ","+ player.getBedSpawnLocation() + "," + JawaCommands.worldSpawns.has(world.getName()));
         
         //If player doesn't have a bed location and there is an applicaple place in the world
         if (JawaCommands.worldSpawns.has(world.getName()) 
-                && event.getRespawnLocation().equals(world.getSpawnLocation()) 
-                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(JawaPermissions.playerRank.get(player.getUniqueId()))){
+                && player.getBedSpawnLocation() == null
+                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank())){
+            
             JSONObject worldSpawns = JawaCommands.worldSpawns.getJSONObject(world.getName());
             //for (String perm : worldSpawns.keySet()) {
               //  System.out.println("checking for jawacommands.spawn."+perm);
                 //if (player.hasPermission("jawacommands.spawn." + perm)){
                   //  System.out.println("user has that permission");
-                    event.setRespawnLocation(LocationDataHandler.unpackLocation(worldSpawns.getJSONObject(JawaPermissions.playerRank.get(player.getUniqueId()))));
+                    event.setRespawnLocation(LocationDataHandler.unpackLocation(worldSpawns.getJSONObject(pdObject.getRank())));
                     //break;
                 //}else {
                   //  System.out.println("user doesn't have that permission");

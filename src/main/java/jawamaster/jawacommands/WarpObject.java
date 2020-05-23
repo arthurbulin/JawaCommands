@@ -20,7 +20,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import jawamaster.jawacommands.handlers.LocationDataHandler;
+import jawamaster.jawacommands.handlers.TPHandler;
+import net.jawasystems.jawacore.handlers.LocationDataHandler;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -282,7 +283,8 @@ public class WarpObject {
     
     public boolean sendPlayer(Player target, boolean override){
         if (override || playerCanVisit(target)){
-            target.teleport(location,PlayerTeleportEvent.TeleportCause.COMMAND);
+            TPHandler.performSafeTeleport(target, location);
+            //target.teleport(location,PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else {
             return false;

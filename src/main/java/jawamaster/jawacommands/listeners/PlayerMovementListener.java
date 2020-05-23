@@ -16,24 +16,23 @@
  */
 package jawamaster.jawacommands.listeners;
 
-import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.handlers.FreezeHandler;
+import jawamaster.jawacommands.handlers.TPHandler;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
  *
  * @author alexander
  */
-public class PlayerQuit implements Listener{
+public class PlayerMovementListener implements Listener {
+
     @EventHandler
-    public static void onPlayerQuit(PlayerQuitEvent event) {
-        //TODO move this into the static BackHandler
-        if (JawaCommands.backStack.containsKey(event.getPlayer().getUniqueId())){
-            JawaCommands.backStack.remove(event.getPlayer().getUniqueId());
+    public void onPlayerMovement(PlayerMoveEvent event) {
+        if (FreezeHandler.isFrozen(event.getPlayer()) || TPHandler.safeTP(event.getPlayer())) {
+            event.setCancelled(true);
         }
-        FreezeHandler.playerQuit(event.getPlayer());
     }
-    
 }
+

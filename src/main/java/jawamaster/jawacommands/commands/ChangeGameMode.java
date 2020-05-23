@@ -16,8 +16,7 @@
  */
 package jawamaster.jawacommands.commands;
 
-import jawamaster.jawacommands.handlers.WorldHandler;
-import org.bukkit.Bukkit;
+import net.jawasystems.jawacore.PlayerManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,112 +32,79 @@ public class ChangeGameMode implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
-        String[] usage = {"/gm [survival|creative|adventure|spectator]",
-                          "/gm [0|1|2|3]",
-                          "/gm [s|c|a|sp]",
-                          "/gm [gamemode] [target]",
-                          "/gm"};
-        GameMode currentMode = ((Player) commandSender).getGameMode();
-        Player target = ((Player) commandSender);
+        String[] usage = {ChatColor.GREEN + " > " + ChatColor.WHITE + "/gm [survival|creative|adventure|spectator]",
+                          ChatColor.GREEN + " > " + ChatColor.WHITE + "/gm [gamemode] [target]",
+                          ChatColor.GREEN + " > " + ChatColor.WHITE + "/gm"};
+        Player target;
+        GameMode toMode;
+        String toGM = "adventure";
+        
         
         //resolve arguments
-        if ((args==null) || (args.length==0)){
+        if ((args==null) || (args.length==0)){ //Allow toggle
             //sWITCH TO CREATIVE IF PLAYER IS IN SURVIVAL AND HAS PERMISSION OR IS ALLOWED TO
-            if (currentMode.equals(GameMode.SURVIVAL) && (target.hasPermission("gamemode.admin.override") || WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", "creative")) ) {
-                    target.setGameMode(GameMode.CREATIVE);
-            } else if (currentMode.equals(GameMode.CREATIVE) && (target.hasPermission("gamemode.admin.override") || WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", "survival")) ) {
-                target.setGameMode(GameMode.SURVIVAL);
+            if (((Player) commandSender).getGameMode().equals(GameMode.SURVIVAL)) {
+                toGM = GameMode.CREATIVE.toString().toLowerCase();
+            } else if (((Player) commandSender).getGameMode().equals(GameMode.CREATIVE)) {
+                toGM = GameMode.SURVIVAL.toString().toLowerCase();
             }
-            target.sendMessage(ChatColor.GREEN + " > Your game mode has been toggled to " + target.getGameMode().toString());
-            return true;
+            
+            target = ((Player) commandSender);
+        } else if (args.length == 1) {
+            target = ((Player) commandSender);
+            toGM = args[0].toLowerCase();
         } else if (args.length == 2){ //Assumes 1 argument is for player self target, else change the gm targer to the name of the player
-            target = Bukkit.getServer().getPlayer(args[1]);
+            if (!commandSender.hasPermission("gamemode.admin.other")){
+                commandSender.sendMessage(ChatColor.RED + " > You do not have permission to change other people's gamemode.");
+                return true;
+            }
+            
+            //Using PlayerManager to resolve nicknames
+            target = PlayerManager.getPlayer(args[1]);
             if (target == null){
                 commandSender.sendMessage(ChatColor.RED + " > " + args[1] + " was not found in the online players!");
                 return true;
             }
-        } else if (args.length > 2) {
-            target.sendMessage(ChatColor.RED + " > Too many arguments!");
+
+            toGM = args[0].toLowerCase();
+        } else {
+            commandSender.sendMessage(ChatColor.RED + " > Too many arguments!");
+            commandSender.sendMessage(usage);
             return true;
         }
-        String[] modesShort = {"s","c","a","sp"};
-        String[] modesLong = {"survival","creative","adventure","spectator"};
-        String[] modesInt = {"0","1","2","3"};
-        //If args.length == 1 or 2
-        String toGM = args[0].toLowerCase();
-        if (toGM.length() > 1) toGM = toGM.substring(0,2);
-        GameMode toMode;
-        switch (toGM) {
-            case "s" :
-                toMode = GameMode.SURVIVAL;
-                break;
-            case "c":
-                toMode = GameMode.CREATIVE;
-                break;
-            case "a":
-                toMode = GameMode.ADVENTURE;
-                break;
-            case "sp":
-                toMode = GameMode.SPECTATOR;
-                break;
-            case "0":
-                toMode = GameMode.SURVIVAL;
-                break;
-            case "1":
-                toMode = GameMode.CREATIVE;
-                break;
-            case "2":
-                toMode = GameMode.ADVENTURE;
-                break;
-            case "3":
-                toMode = GameMode.SPECTATOR;
-                break;
-            case "su" :
-                toMode = GameMode.SURVIVAL;
-                break;
-            case "cr":
-                toMode = GameMode.CREATIVE;
-                break;
-            case "ad":
-                toMode = GameMode.ADVENTURE;
-                break;
-            default:
-                ((Player) commandSender).sendMessage(ChatColor.RED + " > " + args[0] + " is not an understood game type!");
-                return true;
-        }
-        System.out.println("Mode Name: " + toMode.toString());
-        boolean allowedInWorld = WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", toMode.toString().toLowerCase());
-        
-        if (allowedInWorld || target.hasPermission("gamemode.admin.override")){
-            target.setGameMode(toMode);
-        }
-        
-//        //Change game mode
-//        if ((toGM.charAt(0) == 'c' || "1".equals(toGM)) && (target.hasPermission("gamemode.admin.override") || WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", "creative"))) { //Creative
-//            target.setGameMode(GameMode.CREATIVE);
-//        } else if ((toGM.charAt(0) == 'a' || "2".equals(toGM)) && (target.hasPermission("gamemode.admin.override") || WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", "adventure"))) { //adventure
-//            target.setGameMode(GameMode.ADVENTURE);
-//        } else if (((toGM.charAt(0) == 's' && !(toGM.charAt(1) == 'p'))  || "0".equals(toGM)) && (target.hasPermission("gamemode.admin.override") || WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", "creative"))) {
-//            target.setGameMode(GameMode.SURVIVAL);
-//        } else if (("sp".equals(toGM)  || "3".equals(toGM)) && (target.hasPermission("gamemode.admin.override") || WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", "creative"))) {
-//            if (!((Player) commandSender).hasPermission("gamemode.admin.override")) {
-//                ((Player) commandSender).sendMessage(ChatColor.RED + " > Spectator mode is restricted to admin ranks only.");
-//                return true;
-//            } else {
-//                target.setGameMode(GameMode.SPECTATOR);
-//            }
-//        } else {
-//            ((Player) commandSender).sendMessage(ChatColor.RED + " > " + args[0] + " is not an understood game type!");
-//            return true;
-//        }
-        
-        //inform target and commandsender
-        if (target.getUniqueId().equals(((Player) commandSender).getUniqueId())){
-            if (!target.getGameMode().equals(GameMode.ADVENTURE)) target.sendMessage(ChatColor.GREEN + " > Your game mode has been changed to " + target.getGameMode().toString());
-            else target.sendMessage(ChatColor.GREEN + " > Your game mode has been changed to " + target.getGameMode().toString());
+
+        if(toGM.equals("s") || toGM.startsWith("su") || toGM.equals("0")){
+            toMode = GameMode.SURVIVAL;
+        } else if (toGM.equals("c") || toGM.startsWith("cr") || toGM.equals("1")){
+            toMode = GameMode.CREATIVE;
+        } else if (toGM.equals("a") || toGM.startsWith("ad") || toGM.equals("2")){
+            toMode = GameMode.ADVENTURE;
+        } else if (toGM.startsWith("sp") || toGM.equals("3")){
+            toMode = GameMode.SPECTATOR;
         } else {
-            target.sendMessage(ChatColor.GREEN + " > Your game mode has been changed to " + target.getGameMode().toString() +" by " + ((Player) commandSender).getDisplayName());
-            ((Player) commandSender).sendMessage(ChatColor.GREEN + " > " + target.getDisplayName() + "'s game mode has been changed to " + target.getGameMode().toString());
+            commandSender.sendMessage(ChatColor.RED + " > " + args[0] + " is not an understood game type!");
+            return true;
+        }
+        
+        //if (WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", toMode.toString().toLowerCase()) || target.hasPermission("gamemode.admin.override")){
+        //System.out.println("gamemode." + toMode.toString().toLowerCase());
+        if (target.hasPermission("gamemode." + toMode.toString().toLowerCase()) || commandSender.hasPermission("gamemode.admin.override")) {
+            target.setGameMode(toMode);
+
+            //inform target and commandsender
+            if (target.getUniqueId().equals(((Player) commandSender).getUniqueId())) {
+                target.sendMessage(ChatColor.GREEN + " > Your game mode has been changed to " + target.getGameMode().toString());
+            } else {
+                target.sendMessage(ChatColor.GREEN + " > Your game mode has been changed to " + target.getGameMode().toString() + " by " + ((Player) commandSender).getDisplayName());
+                commandSender.sendMessage(ChatColor.GREEN + " > " + target.getDisplayName() + ChatColor.GREEN + "'s game mode has been changed to " + target.getGameMode().toString().toLowerCase());
+            }
+        } else {
+            //inform target and commandsender
+            if (target.getUniqueId().equals(((Player) commandSender).getUniqueId())) {
+                target.sendMessage(ChatColor.RED + " > You do not have permission to change your gamemode to " + toMode.toString().toLowerCase());
+            } else {
+                commandSender.sendMessage(ChatColor.RED + " > You do not have permission to override a player's gamemode");
+            }
         }
         
         return true;

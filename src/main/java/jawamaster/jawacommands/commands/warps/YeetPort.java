@@ -16,20 +16,15 @@
  */
 package jawamaster.jawacommands.commands.warps;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import jawamaster.jawacommands.JawaCommands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.block.CommandBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.bukkit.command.BlockCommandSender;
 
@@ -43,21 +38,27 @@ public class YeetPort implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         //Should ignore warp permissions
         //really just a command block command
+        
+        if (!commandSender.hasPermission("jawacommands.yeetport")){
+            
+            return true;
+        }
+        
         if ((args != null) && args.length == 2) {
             String warp = args[0];
             Player target = null;
             if (!args[1].equals("@p")) {
                 target = Bukkit.getPlayer(args[1]);
-                System.out.println("player");
+                //System.out.println("player");
             } else {
-                System.out.println("area");
+                //System.out.println("area");
                 //BoundingBox bb = new BoundingBox();
-                System.out.println(commandSender.getClass());
+                //System.out.println(commandSender.getClass());
                 BlockCommandSender commandBlock = ((BlockCommandSender) commandSender);
-                System.out.println("cast");
+                //System.out.println("cast");
                 
                 List<Player> players = (commandBlock.getBlock().getLocation().getWorld().getPlayers());
-                System.out.println("players");
+                //System.out.println("players");
                 
                 double dist = 100.0;
                 

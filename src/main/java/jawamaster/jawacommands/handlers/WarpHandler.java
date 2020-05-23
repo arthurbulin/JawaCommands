@@ -23,11 +23,11 @@ import java.util.Set;
 import java.util.UUID;
 import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.WarpObject;
-import jawamaster.jawapermissions.utils.ESRequestBuilder;
+import net.jawasystems.jawacore.utils.ESRequestBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.elasticsearch.action.search.SearchRequest;
-import jawamaster.jawapermissions.handlers.ESHandler;
+import net.jawasystems.jawacore.handlers.ESHandler;
 import org.bukkit.ChatColor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -127,7 +127,7 @@ public class WarpHandler {
         
         //Update the ES index
         JSONObject warpData = warp.getWarpData();
-        System.out.println(warpData);
+        //System.out.println(warpData);
         UpdateRequest request = ESRequestBuilder.updateRequestBuilder(warpData, "warps", warp.getWarpName(), true);
         ESHandler.singleUpdateRequest(request);
     }
@@ -141,6 +141,10 @@ public class WarpHandler {
         } else {
             return false;
         }
+    }
+    
+    public static boolean warpExists(String warp){
+        return JawaCommands.getWarpIndex().containsKey(warp);
     }
     
 }

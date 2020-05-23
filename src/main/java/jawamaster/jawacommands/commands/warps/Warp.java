@@ -18,7 +18,6 @@ package jawamaster.jawacommands.commands.warps;
  */
 
 
-import java.util.Arrays;
 import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import org.bukkit.Bukkit;
@@ -40,9 +39,16 @@ public class Warp implements CommandExecutor{
         if ((args == null) || (args.length < 1)) {
             WarpHandler.listWarps((Player) commandSender);
         } else if (args.length == 1) {
-            boolean worked = JawaCommands.getWarpIndex().get(args[0]).sendPlayer((Player) commandSender);
-            if (worked) commandSender.sendMessage(ChatColor.GREEN + " > Warping!");
-            else commandSender.sendMessage(ChatColor.RED + " > You don't have access to that!");
+            if (WarpHandler.warpExists(args[0])) {
+                boolean worked = JawaCommands.getWarpIndex().get(args[0]).sendPlayer((Player) commandSender);
+                if (worked) {
+                    commandSender.sendMessage(ChatColor.GREEN + " > Warping!");
+                } else {
+                    commandSender.sendMessage(ChatColor.RED + " > You don't have access to that!");
+                }
+            } else {
+                commandSender.sendMessage(ChatColor.RED + " > That warp doesn't exist!");
+            }
         } else if(args.length == 2) {
             if (commandSender.hasPermission("jawacommands.warp.other") && JawaCommands.getWarpIndex().containsKey(args[0])){
                 Player target = Bukkit.getPlayer(args[1]);

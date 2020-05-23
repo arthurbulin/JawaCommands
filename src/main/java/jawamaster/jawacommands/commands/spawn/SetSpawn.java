@@ -17,8 +17,8 @@
 package jawamaster.jawacommands.commands.spawn;
 
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.handlers.JSONHandler;
-import jawamaster.jawacommands.handlers.LocationDataHandler;
+import net.jawasystems.jawacore.handlers.JSONHandler;
+import net.jawasystems.jawacore.handlers.LocationDataHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -58,7 +58,7 @@ public class SetSpawn implements CommandExecutor {
             }
             
             commandSender.sendMessage(ChatColor.GREEN + " > New group spawn " + ChatColor.BLUE + args[0] + ChatColor.GREEN + " set for " + ChatColor.BLUE + world.getName() + ChatColor.GREEN + " at X:" + newSpawn.getX() + " Y:" + newSpawn.getY() + " Z:" + newSpawn.getZ());
-            JSONHandler.WriteJSONToFile("/worldspawns.json", JawaCommands.worldSpawns);
+            JSONHandler.WriteJSONToFile(JawaCommands.getPlugin(), "/worldspawns.json", JawaCommands.worldSpawns);
         } else {
             commandSender.sendMessage(ChatColor.RED + " > Error! You have too many flags! Usage: " + ChatColor.WHITE + usage);
         }

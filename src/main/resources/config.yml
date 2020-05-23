@@ -1,2 +1,14 @@
-eshost: localhost
-esport: 9200
+homes-prohibited-worlds:
+  - games
+  - we
+safe-tp-messages: true
+freeze-public-messages: true
+messages:
+  safe-tp-freeze: "&a> You are being frozen for teleport."
+  safe-tp-thaw: "&a> You have been thawed."
+  freeze-public-freeze: "&3> A sudden chill passes over {p}"
+  freeze-public-thaw: "&6> {p} is warmed by the light"
+  home-no-addpermission: "&c> You do not have permission to add a home in this world"
+  home-add: "&a> {h} has been saved"
+  home-del: "&a> {h} has been deleted"
+  home-tp: "&a> Welcome home"

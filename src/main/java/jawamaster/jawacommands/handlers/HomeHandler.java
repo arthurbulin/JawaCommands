@@ -16,38 +16,35 @@
  */
 package jawamaster.jawacommands.handlers;
 
-import java.util.Arrays;
-import java.util.Set;
-import jawamaster.jawapermissions.PlayerDataObject;
-import jawamaster.jawapermissions.utils.ESRequestBuilder;
-import org.bukkit.ChatColor;
+import java.util.LinkedList;
+import net.jawasystems.jawacore.handlers.LocationDataHandler;
+import java.util.List;
+import jawamaster.jawacommands.JawaCommands;
+import net.jawasystems.jawacore.PlayerManager;
+import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.entity.Player;
-import org.elasticsearch.action.update.UpdateRequest;
 import org.json.JSONObject;
-import jawamaster.jawapermissions.handlers.ESHandler;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 /**
  *
- * @author alexander
+ * @author Jawamaster (Arthur Bulin)
  */
 public class HomeHandler {
-    
-    private static String red = ChatColor.RED + " > ";
-    private static String green = ChatColor.GREEN + " > ";
-    private static String noPermission = ChatColor.RED + " > You do not have permission to do that.";
-
-    /** Returns a PlayerDataObject from JawaPermissions. This object will contain
-     * any "homes" index data the user has. This information call is private and
-     * is only a worker for this class.
-     * @param player
-     * @return 
-     */
-    private static PlayerDataObject getPDO(Player player) {
-        PlayerDataObject pdObject = new PlayerDataObject(player.getUniqueId());
-        pdObject = ESHandler.runMultiIndexSearch(ESRequestBuilder.buildSingleMultiSearchRequest("homes", "_id", player.getUniqueId().toString()), pdObject);
-        return pdObject;
-    }
+    public static final String HOMEPERMISSION = "jawacommands.home";
+    public static final String ADDPERMISSION = HOMEPERMISSION + ".add";
+    public static final String DELPERMISSION = HOMEPERMISSION + ".del";
+    public static final String LISTPERMISSION = HOMEPERMISSION + ".list";
+    public static final String ADMINPERMISSION = HOMEPERMISSION.concat(".admin");
+    private static final String NOPERMISSION = ChatColor.RED + "> You do not have permission to do that.";
+    private static final String NOADDPERMISSION = ChatColor.RED + "> You do not have permission to add a home in this world.";
+    private static final String NODELPERMISSION = ChatColor.RED + "> You do not have permission to remove a home in this world.";
+    private static final String NOHOMES = ChatColor.RED + "> You do not have any homes set. Run /home help to see how.";
+    private static final String NOHOME = ChatColor.RED + "> {h} does not exist in your home list.";
 
     /** Adds a home entry to the user's "homes" index entry. If replace == true
      * an existing home will be overwritten. Otherwise the player will be warned
@@ -58,30 +55,30 @@ public class HomeHandler {
      * @return 
      */
     public static boolean addHome(Player player, String homeName, boolean replace) {
-        if (player.hasPermission("jawacommands.home.add")) { //Check if user has permission
-            PlayerDataObject pdObject = getPDO(player);
-
+        //if has admin permission skip other checks
+        //else if homes implicitly true allowed then check permission ONLY if the world is in a non-allowed list.
+        //else if homes implicitly allowed false check for individual world permissions
+        if (player.hasPermission(ADMINPERMISSION) || 
+                (player.hasPermission(ADDPERMISSION) && !JawaCommands.getConfiguration().getStringList("homes-prohibited-worlds").contains(player.getWorld().getName())) 
+                || player.hasPermission(ADDPERMISSION.concat(".").concat(player.getWorld().getName().toLowerCase()))){
+            PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
             //Check that name doesnt exist
-            if (pdObject.containsHome(homeName) && !replace) {
-                player.sendMessage(red + "Error: That home already exists! Remove it first or rerun with the -r flag!");
+            if (homeName.equalsIgnoreCase("bed")){
+                player.sendMessage(ChatColor.RED + "> Error: You can only set a bed home by sleeping in a bed!");
+                return false;
+            } else if (pdObject.containsHome(homeName) && !replace) {
+                player.sendMessage(ChatColor.RED + "> Error: " + homeName +" already exists! Remove it first or replace it with 'replace'");
+                return false;
+            } else {
+                pdObject.setHome(homeName, LocationDataHandler.packLocation(player.getLocation()));
+                String homeMessage = JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-add", ChatColor.GREEN + "> {h} has been saved").replace("{h}", homeName);
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', homeMessage));
                 return true;
             }
-
-            //Collect player location data
-            //Create home data
-            JSONObject topLevel = LocationDataHandler.createTopLevelHomeObject(player.getLocation(), homeName);
-
-            boolean success = ESHandler.singleUpdateRequest(ESRequestBuilder.updateRequestBuilder(topLevel, "homes", player.getUniqueId().toString(), true));
-
-            if (success) {
-                player.sendMessage(green + homeName + " has been successfully saved!");
-            } else {
-                player.sendMessage(red + homeName + " failed to be saved!");
-            }
         } else {
-            player.sendMessage(noPermission);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-no-addpermission", NOADDPERMISSION)));
+            return false;
         }
-        return true;
     }
 
     /** Removes an entry from the user's "homes" index entry. If the home does not
@@ -91,62 +88,88 @@ public class HomeHandler {
      * @return 
      */
     public static boolean removeHome(Player player, String homeName) {
-        if (player.hasPermission("jawacommands.home.del")) { //Check if user has permission
-            PlayerDataObject pdObject = getPDO(player);
+        //TODO allow the creation of non-deletable homes based on world or admin created
+        if (player.hasPermission(DELPERMISSION)) { //Check if user has permission
+            PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
 
             if (!pdObject.containsHome(homeName)) {
-                player.sendMessage(red + homeName + " is not in your home's list and cannot be removed!");
+                player.sendMessage(NOHOME.replace("{h}", homeName));
+                return false;
+            } else {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-del", ChatColor.GREEN + "> " + homeName + " has been deleted").replace("{h}", homeName)));
+                pdObject.removeHome(homeName);
                 return true;
             }
-            UpdateRequest request = ESRequestBuilder.requestFieldRemoval(player, homeName);
 
-            boolean status = ESHandler.singleUpdateRequest(request);
-
-            if (status == true) {
-                player.sendMessage(green + homeName + " has been successfully " + ChatColor.DARK_RED + " removed" + ChatColor.GREEN + "!");
-            } else {
-                player.sendMessage(red + homeName + " failed to be deleted!");
-            }
         } else {
-            player.sendMessage(noPermission);
+            player.sendMessage(NODELPERMISSION);
+            return false;
         }
-        return true;
-        
     }
 
     /** Sends a list of homes to the player in a viewable format.
      * @param player
      * @return 
      */
-    public static boolean sendHomeList(Player player) {
-        if (player.hasPermission("jawacommands.home.list")) {
-            Set homeList = getHomeList(player);
-            if (homeList != null) {
-                player.sendMessage(green + "Your homes: " + ChatColor.WHITE + String.join(", ", Arrays.toString(homeList.toArray())));
-                return true;
+    public static void sendHomeList(Player player) {
+        if (player.hasPermission(LISTPERMISSION)) {
+            PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
+            if (pdObject.containsHomeData()) {
+                List<String> homeList = pdObject.getHomeList();
+
+                int partitionSize = 4;
+                List<List<String>> partitions = new LinkedList<List<String>>();
+                for (int i = 0; i < homeList.size(); i += partitionSize) {
+                    partitions.add(homeList.subList(i, Math.min(i + partitionSize, homeList.size())));
+                }
+                
+//                double iters = Math.ceil(homeList.size() / 7.0);
+//                int total = homeList.size();
+                player.sendMessage(ChatColor.GREEN + "> These are your homes:");
+                for (List<String> homeLine : partitions){
+                    ComponentBuilder compBuilder = new ComponentBuilder(" > ").color(ChatColor.GREEN);
+                    for (String home : homeLine){
+                        compBuilder.append("[" + home + "]").color(ChatColor.BLUE)
+                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home " + home))
+                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Go To " + home).create()))
+                                .append("[i]").color(ChatColor.YELLOW)
+                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home info " + home))
+                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(home + " info").create()))
+                                .append(" ");
+                    }
+                    BaseComponent[] baseComp = compBuilder.create();
+                    player.spigot().sendMessage(baseComp);
+                }
+//                //int i = 1;
+//                int fromIndex = 0;
+//                int toIndex = 0;
+//                for (int i = 0; i < iters; i++){
+//                    ComponentBuilder compBuilder = new ComponentBuilder(" > ").color(ChatColor.GREEN);
+//                    
+//                    toIndex = 7 * (i + 1);
+//                    if (toIndex > total) toIndex = total;
+//                    for (String home : homeList.subList(fromIndex, toIndex)){
+//                        compBuilder.append("[" + home + "]").color(ChatColor.BLUE)
+//                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home " + home))
+//                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Go To " + home).create()))
+//                                .append("[i]").color(ChatColor.YELLOW)
+//                                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home info " + home))
+//                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(home + " info").create()))
+//                                .append(" ");
+//                                
+//                    }        
+//                    fromIndex = (7 * (i+1)) + 1;
+//                    BaseComponent[] baseComp = compBuilder.create();
+//                    player.spigot().sendMessage(baseComp);
+//                }
+                
             } else {
-                player.sendMessage(red + "You don't have any homes set!");
-                return false;
+                player.sendMessage(NOHOMES);
             }
+
         } else {
-            player.sendMessage(noPermission);
-            return false;
+            player.sendMessage(NOPERMISSION);
         }
-    }
-    
-    /** Returns a Set containing the home names for a player. If a user has no homes
-     * returns null;
-     * @param player
-     * @return 
-     */
-    private static Set getHomeList(Player player){
-        PlayerDataObject pdObject = getPDO(player);
-        
-        if (pdObject.containsHomeData()){
-            Set homes = pdObject.getHomeEntries();
-            //if (player.getBedSpawnLocation() != null) homes.add("bed");
-            return homes;
-        } else return null;
     }
 
     /** Gets detailed and formatted home information for the player.
@@ -154,29 +177,36 @@ public class HomeHandler {
      * @param homeName 
      */
     public static void sendHomeInfo(Player player, String homeName) {
-
-        JSONObject home = getHome(player, homeName);
-        if (home != null) {
-            player.sendMessage(green + "Name: " + ChatColor.WHITE + homeName);
-            player.sendMessage(green + "World: " + ChatColor.WHITE + home.getString("world"));
-            player.sendMessage(green + "(X,Y,Z): " + ChatColor.WHITE + "(" + (int) Math.round(home.getDouble("X")) + "," + (int) Math.round(home.getDouble("Y")) + "," + (int) Math.round(home.getDouble("Z")) + ")");
+        
+        PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
+        if (pdObject.containsHome(homeName)) {
+            JSONObject home = pdObject.getHome(homeName);
+            BaseComponent[] homeInfo = new ComponentBuilder("> Home info for " + homeName).color(ChatColor.GREEN).create();
+            BaseComponent[] homePosition = new ComponentBuilder(" > World: ").color(ChatColor.GREEN)
+                    .append(home.getString("world")).color(ChatColor.BLUE)
+                    .append(" (X,Y,Z): ").color(ChatColor.GREEN)
+                    .append((int) Math.round(home.getDouble("X")) + "," + (int) Math.round(home.getDouble("Y")) + "," + (int) Math.round(home.getDouble("Z"))).color(ChatColor.GOLD)
+                    .create();
+            BaseComponent[] homeOptions = new ComponentBuilder(" > Home Options: ").color(ChatColor.GREEN)
+                    .append(" [Delete]").color(ChatColor.DARK_RED)
+                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/home delete " + homeName))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder("!!Delete This Home!!").create())))
+                    .append(" [Share]").color(ChatColor.YELLOW)
+                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "Not Yet Implimented"))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Share").create()))
+                    .append(" [Go To]").color(ChatColor.GREEN)
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home " + homeName))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Go To").create()))
+                    .create();
+            player.spigot().sendMessage(homeInfo);
+            player.spigot().sendMessage(homePosition);
+            player.spigot().sendMessage(homeOptions);
+            
         } else {
-            player.sendMessage(red + homeName + " is not in your home's list and cannot be removed!"  );
-
+            player.sendMessage(NOHOME.replace("{h}", homeName));
         }
     }
     
-    /** Returns a user's specified home JSONObject containing the same data as a
-     * Bukkit Location.
-     * @param player
-     * @param homeName
-     * @return 
-     */
-    public static JSONObject getHome(Player player, String homeName) {
-        PlayerDataObject pdObject = getPDO(player);
-        if (pdObject.containsHomeData()) return pdObject.getHome(homeName);
-        else return null;
-    }
     
     /** Sends a player to the specified home location. Returns true on a successful transport
      * otherwise returns false.
@@ -185,15 +215,22 @@ public class HomeHandler {
      * @return 
      */
     public static boolean sendToHome(Player player, String homeName){
-        PlayerDataObject pdObject = getPDO(player);
-        
-        if (pdObject.containsHome(homeName)) {
-            player.sendMessage(ChatColor.GREEN + " > Welcome home.");
-            player.teleport(LocationDataHandler.unpackLocation(pdObject.getHome(homeName)),PlayerTeleportEvent.TeleportCause.COMMAND);
+        PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
+        if (homeName.equalsIgnoreCase("bed")) {
+            if (player.getBedSpawnLocation() != null){
+                TPHandler.performSafeTeleport(player, player.getBedSpawnLocation());
+                return true;
+            } else {
+                player.sendMessage(ChatColor.RED + "> Error: You do not have a valid bed location. Sleep in a bed to set your bed spawn.");
+                return false;
+            }
+        } else if (pdObject.containsHome(homeName)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-tp", "&a> Welcome home")));
+            TPHandler.performSafeTeleport(player, LocationDataHandler.unpackLocation(pdObject.getHome(homeName)));
             return true;
         } else {
+            player.sendMessage(NOHOME.replace("{h}", homeName));
             return false;
         }
     }
-
 }

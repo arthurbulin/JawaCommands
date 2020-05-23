@@ -18,7 +18,7 @@ package jawamaster.jawacommands.commands.spawn;
 
 import java.util.Arrays;
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.handlers.JSONHandler;
+import net.jawasystems.jawacore.handlers.JSONHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -58,7 +58,7 @@ public class RemoveSpawn implements CommandExecutor {
             } else {
                 JawaCommands.worldSpawns.getJSONObject(args[0]).remove(args[1]);
                 if (JawaCommands.worldSpawns.getJSONObject(args[0]).isEmpty()) JawaCommands.worldSpawns.remove(args[0]); //Remove world if it has no custom spawns
-                JSONHandler.WriteJSONToFile("/worldspawns.json", JawaCommands.worldSpawns);
+                JSONHandler.WriteJSONToFile(JawaCommands.getPlugin(), "/worldspawns.json", JawaCommands.worldSpawns);
                 commandSender.sendMessage(ChatColor.GREEN + " > " + args[1] + " has been removed from " + args[0]);
             }
         }else if (args.length == 2 && !JawaCommands.worldSpawns.has(args[0])){
