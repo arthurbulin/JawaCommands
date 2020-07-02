@@ -18,6 +18,7 @@ package jawamaster.jawacommands.commands.warps;
 
 import java.util.List;
 import jawamaster.jawacommands.JawaCommands;
+import jawamaster.jawacommands.handlers.WarpHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -91,7 +92,7 @@ public class YeetPort implements CommandExecutor {
                     player.setVelocity(up);
                     if (player.getLocation().getBlockY() > (startY + 100)) {
                         player.setVelocity(none);
-                        JawaCommands.getWarpIndex().get(warp).sendPlayer(player, true);
+                        WarpHandler.getWarp(warp).sendPlayer(player, true);
                         this.cancel();
                     }
                 }

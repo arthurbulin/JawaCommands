@@ -17,7 +17,7 @@
 package jawamaster.jawacommands.commands.warps;
 
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.WarpObject;
+import jawamaster.jawacommands.Warp;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -34,19 +34,19 @@ public class WarpBlackList implements CommandExecutor{
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String arg0, String[] args) {
         String usage = "/blwarp <warp name> <player name>";
-        WarpObject warp;
+        Warp warp;
         
         if ((args == null) || (args.length < 2)) {
             commandSender.sendMessage(ChatColor.RED + " > Usage: " + usage);
             return true;
         } 
         
-        if (!JawaCommands.getWarpIndex().containsKey(args[0])){
+        if (!WarpHandler.warpExists(args[0])){
             commandSender.sendMessage(ChatColor.RED + " > "+ args[0] + " does not exist! Create it first to modify it's parameters!");
             return true;
         }
         
-        warp = JawaCommands.getWarpIndex().get(args[0]);
+        warp = WarpHandler.getWarp(args[0]);
 
 //        if (!warp.isWhiteListed()){
 //            commandSender.sendMessage(ChatColor.RED + " > You must enable the whitelist first! /modwarp -w " + args[0]);

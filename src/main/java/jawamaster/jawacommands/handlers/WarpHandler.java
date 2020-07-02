@@ -21,14 +21,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.WarpObject;
+import jawamaster.jawacommands.Warp;
 import net.jawasystems.jawacore.utils.ESRequestBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.elasticsearch.action.search.SearchRequest;
 import net.jawasystems.jawacore.handlers.ESHandler;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.search.SearchHit;
@@ -40,18 +44,26 @@ import org.json.JSONObject;
  */
 public class WarpHandler {
     
-    public static HashMap<String,WarpObject> loadWarpObjects(){ //TODO if check for malformed warps to prevent errors
-        HashMap<String, WarpObject> warps = new HashMap();
+    private static HashMap<String, Warp> warpIndex;
+            
+    public WarpHandler(){
+        warpIndex = WarpHandler.loadWarpObjects();
+        Logger.getLogger("WarpHandler").log(Level.INFO, "Warps loaded:{0}. {1}", new Object[]{warpIndex.size(), warpIndex.keySet()});
+
+    }
+
+    
+    public static HashMap<String,Warp> loadWarpObjects(){ //TODO if check for malformed warps to prevent errors
+        HashMap<String, Warp> warps = new HashMap();
         
         SearchRequest request = ESRequestBuilder.getAllOfIndex("warps");
         SearchHit[] hits = ESHandler.runSearchRequest(request);
         
         if ((hits != null) && (hits.length > 0)) {
             Arrays.asList(hits).forEach((hit) -> {
-                warps.put(hit.getId(), new WarpObject(hit.getId(), new JSONObject(hit.getSourceAsMap())));
+                warps.put(hit.getId(), new Warp(hit.getId(), new JSONObject(hit.getSourceAsMap())));
             });
-            System.out.println(warps.size() + " warps loaded into memory.");
-            System.out.println(warps.keySet());
+            
         } else {
         }
         
@@ -66,21 +78,21 @@ public class WarpHandler {
      * @param hidden
      * @return 
      */
-    private static WarpObject buildWarpObject(String warpName, String type, Location location, UUID createdBy){
-        WarpObject warp = new WarpObject(warpName, type, createdBy);
+    private static Warp buildWarpObject(String warpName, String type, Location location, UUID createdBy){
+        Warp warp = new Warp(warpName, type, createdBy);
         warp.setLocation(location);
         return warp;
     }
     
     public static boolean createWarp(Player player, String warpName, String type){
         //make sure this isnt an existing warp
-        if (JawaCommands.getWarpIndex().containsKey(warpName)) {
+        if (warpIndex.containsKey(warpName)) {
             player.sendMessage(ChatColor.RED + " > " + warpName + " already exists in the warp database! Use a differnet name or delete/modify the exisint one!");
             return false;
         }
         
         //Generate new warpObject
-        WarpObject newWarp = buildWarpObject(warpName, type, player.getLocation(), player.getUniqueId());
+        Warp newWarp = buildWarpObject(warpName, type, player.getLocation(), player.getUniqueId());
         
         //Create the index request
         IndexRequest indexRequest = ESRequestBuilder.createIndexRequest("warps", warpName, newWarp.getWarpData());
@@ -90,7 +102,7 @@ public class WarpHandler {
         
         //If it worked tell the player if it didnt also tell the player!
         if (esWorked) {
-            JawaCommands.addWarpToIndex(newWarp);
+            warpIndex.put(newWarp.getWarpName(), newWarp);
             player.sendMessage(ChatColor.GREEN + " > " + warpName + " has been indexed! You can modify it with /modwarp.");
             return true;
         } else {
@@ -103,7 +115,7 @@ public class WarpHandler {
         Set<String> hiddenVisible = new HashSet();
         Set<String> regularVisible = new HashSet();
         
-        JawaCommands.getWarpIndex().values().forEach((warp) -> {
+        warpIndex.values().forEach((warp) -> {
             if (warp.isHidden() && warp.playerCanSee(player)){
                 if (warp.playerCanVisit(player)) hiddenVisible.add(ChatColor.GREEN + warp.getWarpName() + ChatColor.WHITE);
                 else hiddenVisible.add(ChatColor.RED + warp.getWarpName()  + ChatColor.WHITE);
@@ -121,9 +133,9 @@ public class WarpHandler {
         }
     }
     
-    public static void updateWarp(WarpObject warp){
+    public static void updateWarp(Warp warp){
         //Push update to current list
-        JawaCommands.getWarpIndex().put(warp.getWarpName(), warp);
+        warpIndex.put(warp.getWarpName(), warp);
         
         //Update the ES index
         JSONObject warpData = warp.getWarpData();
@@ -132,11 +144,11 @@ public class WarpHandler {
         ESHandler.singleUpdateRequest(request);
     }
     
-    public static boolean deleteWarp(WarpObject warp){
+    public static boolean deleteWarp(String warp){
         //remove from ES        
-        boolean worked = ESHandler.runSingleDocumentDeleteRequest(ESRequestBuilder.deleteDocumentRequest("warps", warp.getWarpName()));
+        boolean worked = ESHandler.runSingleDocumentDeleteRequest(ESRequestBuilder.deleteDocumentRequest("warps", warpIndex.get(warp).getWarpName()));
         if (worked) {
-            JawaCommands.getWarpIndex().remove(warp.getWarpName());
+            warpIndex.remove(warp);
             return true;
         } else {
             return false;
@@ -144,7 +156,29 @@ public class WarpHandler {
     }
     
     public static boolean warpExists(String warp){
-        return JawaCommands.getWarpIndex().containsKey(warp);
+        return warpIndex.containsKey(warp);
     }
+    
+    public static boolean canVisit(CommandSender commandSender, String warp){
+        return warpIndex.get(warp).canVisit(commandSender);
+    }
+    
+    public static boolean canVisit(Player player, String warp){
+        return warpIndex.get(warp).playerCanVisit((Player) player);
+    }
+    
+    //TODO build administration options
+    public static boolean canAdministrate(Player player, String warp){
+        return false;
+    }
+    
+    public static void sendPlayer(Player target, String warp){
+        warpIndex.get(warp).sendPlayer(target);
+    }
+    
+    public static Warp getWarp(String warp){
+        return warpIndex.get(warp);
+    }
+    
     
 }

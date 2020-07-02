@@ -32,8 +32,9 @@ import org.json.JSONObject;
 public class JawaCommands extends JavaPlugin {
     private static JawaCommands plugin;
     private static CommandControlHandler commandControlHandler;
-    
-    private static HashMap<String, WarpObject> warpIndex;
+   
+    private static WarpHandler warpHandler;
+   
     private static JSONObject worldConfigurations;
     
     public static HashMap<UUID, JSONArray> backStack;
@@ -54,7 +55,6 @@ public class JawaCommands extends JavaPlugin {
         worldConfigurations = WorldHandler.LoadWorldConfigs();
         
         //TODO Make the warp handler into its own static instance
-        warpIndex = WarpHandler.loadWarpObjects();
         
         backStack = new HashMap();
         
@@ -66,6 +66,8 @@ public class JawaCommands extends JavaPlugin {
         
         //commandControlHandler
         commandControlHandler = new CommandControlHandler(plugin);
+        
+        warpHandler = new WarpHandler();
         
         this.getCommand("testcommand").setExecutor(new TestCommand());
 
@@ -99,13 +101,7 @@ public class JawaCommands extends JavaPlugin {
         return plugin;
     }
     
-    public static HashMap<String, WarpObject> getWarpIndex(){
-        return warpIndex;
-    }
-    
-    public static void addWarpToIndex(WarpObject obj){
-        warpIndex.put(obj.getWarpName(), obj);
-    }
+
     
     public void loadConfig(){
         System.out.print("Loading configuration from file.");

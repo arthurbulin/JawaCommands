@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.WarpObject;
+import jawamaster.jawacommands.Warp;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import net.jawasystems.jawacore.handlers.ESHandler;
 import net.jawasystems.jawacore.utils.ArgumentParser;
@@ -62,13 +62,13 @@ public class ModWarp implements CommandExecutor{
         }
         
         //Warp doesnt exist in loaded memory?
-        if (!JawaCommands.getWarpIndex().containsKey(warpName)){
+        if (!WarpHandler.warpExists(warpName)){
             commandSender.sendMessage(redSlug + warpName + " does not exist! Create it first to modify it's parameters!");
             return true;
         }
         
         //Get the warp object
-        WarpObject warp = JawaCommands.getWarpIndex().get(warpName);
+        Warp warp = WarpHandler.getWarp(warpName);
         
         if (!warp.playerCanModify((Player) commandSender)) {
             commandSender.sendMessage(redSlug + "You do not have permission to modify that warp! If you belive that is in error please speak to an admin!");

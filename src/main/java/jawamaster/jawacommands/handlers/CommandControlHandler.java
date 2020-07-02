@@ -22,6 +22,8 @@ import jawamaster.jawacommands.commands.ChangeGameMode;
 import jawamaster.jawacommands.commands.Colors;
 import jawamaster.jawacommands.commands.ComeHere;
 import jawamaster.jawacommands.commands.GoThere;
+import jawamaster.jawacommands.commands.PlayerTime;
+import jawamaster.jawacommands.commands.PlayerWeather;
 import jawamaster.jawacommands.commands.TPAccept;
 import jawamaster.jawacommands.commands.admin.Freeze;
 import jawamaster.jawacommands.commands.admin.SudoAs;
@@ -36,7 +38,7 @@ import jawamaster.jawacommands.commands.spawn.Spawn;
 import jawamaster.jawacommands.commands.warps.DelWarp;
 import jawamaster.jawacommands.commands.warps.MakeWarp;
 import jawamaster.jawacommands.commands.warps.ModWarp;
-import jawamaster.jawacommands.commands.warps.Warp;
+import jawamaster.jawacommands.commands.warps.WarpCommand;
 import jawamaster.jawacommands.commands.warps.WarpBlackList;
 import jawamaster.jawacommands.commands.warps.WarpWhitelist;
 import jawamaster.jawacommands.commands.warps.YeetPort;
@@ -70,7 +72,7 @@ public class CommandControlHandler {
         commandMap.put("sudo", new SudoAs());
 
         commandMap.put("makewarp", new MakeWarp());
-        commandMap.put("warp", new Warp());
+        commandMap.put("warp", new WarpCommand());
         commandMap.put("modwarp", new ModWarp());
         commandMap.put("delwarp", new DelWarp());
         commandMap.put("wlwarp", new WarpWhitelist());
@@ -95,9 +97,12 @@ public class CommandControlHandler {
         commandMap.put("tpr", new RandomTP());
         
         commandMap.put("freeze", new Freeze());
-
+        
+        commandMap.put("pweather", new PlayerWeather());
+        commandMap.put("ptime", new PlayerTime());
 
         registerCommands();
+        buildTabCompletionTable();
     }
 
     private static void registerCommands() {
@@ -111,6 +116,10 @@ public class CommandControlHandler {
     private static boolean registerCommand(String command, CommandExecutor exec) {
         plugin.getCommand(command).setExecutor(exec);
         return true;
+    }
+    
+    public static void buildTabCompletionTable(){
+        //System.out.println(commandMap.get("ptime").getClass());
     }
 
 }

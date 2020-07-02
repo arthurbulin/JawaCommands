@@ -23,8 +23,9 @@ import java.util.UUID;
 import jawamaster.jawacommands.handlers.TPHandler;
 import net.jawasystems.jawacore.handlers.LocationDataHandler;
 import org.bukkit.Location;
+import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -32,19 +33,19 @@ import org.json.JSONObject;
  *
  * @author alexander
  */
-public class WarpObject {
+public class Warp {
     private JSONObject warpData;
     private String warpName;
     private Location location;
     private final Set WARPTYPES = new HashSet(Arrays.asList("public", "private", "permission"));
     
-    public WarpObject(String warpName, JSONObject warpData){
+    public Warp(String warpName, JSONObject warpData){
         this.warpData = warpData;
         this.warpName = warpName;
         location = LocationDataHandler.unpackLocation(warpData.getJSONObject("location"));
     }
     
-    public WarpObject(String warpName, String type, UUID createdBy){
+    public Warp(String warpName, String type, UUID createdBy){
         this.warpName = warpName;
         this.warpData = new JSONObject();
         warpData.put("created-by", createdBy.toString());
@@ -85,7 +86,7 @@ public class WarpObject {
     }
 
 //###############################################################################
-// Get WarpObject data
+// Get Warp data
 //###############################################################################
     public String getWarpName(){
         return warpName;
@@ -137,6 +138,24 @@ public class WarpObject {
         }
     }
     
+    /** If a given CommandSender can visit. This evaluates if the CommandSender
+     * is a player or a command block. For any other type of entity this will return false
+     * because what else is running the command? The player portion of this is backed
+     * by playerCanVisit(Player player)
+     * @param commandSender the sender executing the command
+     * @return 
+     */
+    public boolean canVisit(CommandSender commandSender){
+        if (commandSender instanceof Player) return playerCanVisit((Player) commandSender);
+        else if (commandSender instanceof BlockCommandSender) return true; //This allows command blocks to send players using the same logic as the warp other option
+        else return false;
+    }
+    
+    /** Returns true is a player can visit this warp. This checks permissions, 
+     * admin permissions, ownership, white lists, and black lists.
+     * @param player
+     * @return 
+     */
     public boolean playerCanVisit(Player player){
         //On all
             //restrict if on blacklist
@@ -145,8 +164,6 @@ public class WarpObject {
             //Allow if owner
         //if permission
             //Allow if permission
-
-        
         if (player.hasPermission("warps.admin.visitall") || getOwner().equals(player.getUniqueId())) return true; //If a player is admin OR is the owner
         else if (getBlackList().toList().contains(player.getUniqueId())) return false; //instantly say no if the player is blacklisted. Type does not matter.
         else if (isWhiteListed() && getWhiteList().toList().contains(player.getUniqueId())) return true; //If the whitelist is enabled AND contains the player
@@ -154,7 +171,12 @@ public class WarpObject {
         else return true; //Public unrestricted
     }
     
-    
+    /** Will return true or false depending on if a player can see a specified warp.
+     * This will evaluate warp type, hidden state, permissions, admin permissions, 
+     * ownership, and white lists.
+     * @param player
+     * @return 
+     */
     public boolean playerCanSee(Player player){
         if (isHidden()){
             if (getType().equals("private") && getWhiteList().toList().contains(player.getUniqueId())) return true; // If it is a private warp AND they are whitelisted
@@ -167,6 +189,10 @@ public class WarpObject {
         }
     }
     
+    /** Returns true if a player has the permission to modify a warp.
+     * @param player
+     * @return 
+     */
     public boolean playerCanModify(Player player){
         if (player.hasPermission("warps.admin.modify")) return true; //if player has universal modify command
         else if (getOwner().equals(player.getUniqueId())) return true; //if player is warp owner
@@ -176,10 +202,13 @@ public class WarpObject {
 //###############################################################################
 // Set warp data
 //###############################################################################
-    
+    /** Returns true if a warp type is valid and can be set.
+     * @param type
+     * @return 
+     */
     public boolean setType(String type){
-        if (WARPTYPES.contains(type)){
-            warpData.put("type", type);
+        if (WARPTYPES.contains(type.toLowerCase())){ // Added the toLowerCase to protect against admins who put don't understand case-sensativity
+            warpData.put("type", type.toLowerCase()); // Xaihn im talking about you
             return true;
         } else {
             return false;
@@ -276,8 +305,8 @@ public class WarpObject {
 // Player things
 //###############################################################################
     
-    public boolean sendPlayer(Player target){
-        return sendPlayer(target, false);
+    public void sendPlayer(Player target){
+        TPHandler.performSafeTeleport(target, location);
         
     }
     

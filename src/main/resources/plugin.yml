@@ -81,6 +81,14 @@ commands:
     description: "Freezes a player's motion preventing them from moving"
     usage: "/freeze <player>"
     permission: jawacommands.freeze
+  pweather:
+    description: "Allows a player to toggle their local player weather"
+    usage: "/pweather [clear|rain|reset] [player]. Run without arguments to reset your own weather."
+    permission: "jawacommands.pweather"
+  ptime:
+    description: "Allows a player to toggle their local player time"
+    usage: "/ptime [morning|noon|sunset|night|midnight|sunrise|reset] [player]. Run without arguments to reset your own weather."
+    permission: "jawacommands.ptime"
     
 permissions:
   jawacommands.back:
@@ -157,4 +165,16 @@ permissions:
       default: true
   jawacommands.freeze:
       description: Allows an admin to freeze or thaw a player with the freeze command
+      default: op
+  jawacommands.pweather:
+      description: "Allows a user to change their local player weather"
+      default: true
+  jawacommands.pweather.other: 
+      description: "Allows an admin to control the weather of another user"
+      default: op
+  jawacommands.ptime:
+      description: "Allows a user to change their local player time"
+      default: true
+  jawacommands.ptime.other:
+      description: "Allows an admin to control the time of another user"
       default: op

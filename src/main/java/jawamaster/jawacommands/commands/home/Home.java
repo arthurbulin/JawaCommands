@@ -5,6 +5,8 @@
 */
 package jawamaster.jawacommands.commands.home;
 
+import java.util.Arrays;
+import java.util.List;
 import jawamaster.jawacommands.handlers.HomeHandler;
 import org.bukkit.ChatColor;
 
@@ -19,6 +21,10 @@ import org.bukkit.entity.Player;
  * @author Arthur Bulin
  */
 public class Home implements CommandExecutor{
+    
+    public static final List<String> TABCOMPLETES = Arrays.asList("delete","set","replace","info","list","help");
+    public static final List<String> SECONDS = Arrays.asList("delete","set","replace","info");
+    public static final List<String> NOSECONDS = Arrays.asList("list","help");
     
     @Override
     public boolean onCommand(CommandSender commandSender, Command arg1, String arg2, String[] args) {

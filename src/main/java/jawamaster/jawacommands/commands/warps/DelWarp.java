@@ -16,7 +16,6 @@
  */
 package jawamaster.jawacommands.commands.warps;
 
-import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -39,11 +38,11 @@ public class DelWarp implements CommandExecutor{
         }
         
         //Warp doesnt exist in loaded memory?
-        if (!JawaCommands.getWarpIndex().containsKey(args[0])){
+        if (!WarpHandler.warpExists(args[0])){
             commandSender.sendMessage(ChatColor.RED + " > "+ args[0] + " does not exist! Create it first to modify it's parameters!");
             return true;
         } else {
-            boolean worked = WarpHandler.deleteWarp(JawaCommands.getWarpIndex().get(args[0]));
+            boolean worked = WarpHandler.deleteWarp(args[0]);
             if (worked) {
                 commandSender.sendMessage(ChatColor.GREEN + " > " + args[0] + " has been deleted!");
             } else {
