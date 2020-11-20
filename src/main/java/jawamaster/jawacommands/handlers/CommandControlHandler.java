@@ -21,14 +21,17 @@ import jawamaster.jawacommands.FullBright;
 import jawamaster.jawacommands.commands.ChangeGameMode;
 import jawamaster.jawacommands.commands.Colors;
 import jawamaster.jawacommands.commands.ComeHere;
+import jawamaster.jawacommands.commands.FlySpeed;
 import jawamaster.jawacommands.commands.GoThere;
 import jawamaster.jawacommands.commands.PlayerTime;
 import jawamaster.jawacommands.commands.PlayerWeather;
+import jawamaster.jawacommands.commands.SurvivalFly;
 import jawamaster.jawacommands.commands.TPAccept;
+import jawamaster.jawacommands.commands.WalkSpeed;
 import jawamaster.jawacommands.commands.admin.Freeze;
 import jawamaster.jawacommands.commands.admin.SudoAs;
 import jawamaster.jawacommands.commands.development.BackCommand;
-import jawamaster.jawacommands.commands.development.Kit;
+import jawamaster.jawacommands.kit.KitCommand;
 import jawamaster.jawacommands.commands.development.RandomTP;
 import jawamaster.jawacommands.commands.home.Home;
 import jawamaster.jawacommands.commands.home.HomeInfo;
@@ -40,6 +43,7 @@ import jawamaster.jawacommands.commands.warps.MakeWarp;
 import jawamaster.jawacommands.commands.warps.ModWarp;
 import jawamaster.jawacommands.commands.warps.WarpCommand;
 import jawamaster.jawacommands.commands.warps.WarpBlackList;
+import jawamaster.jawacommands.commands.warps.WarpInfo;
 import jawamaster.jawacommands.commands.warps.WarpWhitelist;
 import jawamaster.jawacommands.commands.warps.YeetPort;
 import org.bukkit.command.CommandExecutor;
@@ -61,7 +65,7 @@ public class CommandControlHandler {
         commandMap = new HashMap();
         commandTabs = new HashMap();
         commandMap.put("colors", new Colors());
-        commandMap.put("kit", new Kit());
+        commandMap.put("kit", new KitCommand());
 
         commandMap.put("home", new Home());
 //        commandMap.put("sethome", new setHome());
@@ -100,6 +104,12 @@ public class CommandControlHandler {
         
         commandMap.put("pweather", new PlayerWeather());
         commandMap.put("ptime", new PlayerTime());
+        
+        commandMap.put("sfly", new SurvivalFly());
+        commandMap.put("flyspeed", new FlySpeed());
+        commandMap.put("walkspeed", new WalkSpeed());
+        
+        commandMap.put("warpinfo", new WarpInfo());
 
         registerCommands();
         buildTabCompletionTable();

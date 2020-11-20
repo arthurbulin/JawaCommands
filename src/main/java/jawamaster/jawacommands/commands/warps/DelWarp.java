@@ -33,20 +33,20 @@ public class DelWarp implements CommandExecutor{
         String usage = "/delwarp <warpname>";
         
         if ((args == null) || (args.length < 1)){
-            commandSender.sendMessage(ChatColor.RED + " > Usage: " + usage);
+            commandSender.sendMessage(ChatColor.RED + "> Usage: " + usage);
             return true;
         }
         
         //Warp doesnt exist in loaded memory?
         if (!WarpHandler.warpExists(args[0])){
-            commandSender.sendMessage(ChatColor.RED + " > "+ args[0] + " does not exist! Create it first to modify it's parameters!");
+            commandSender.sendMessage(ChatColor.RED + "> "+ args[0] + " does not exist! Create it first to modify it's parameters!");
             return true;
         } else {
             boolean worked = WarpHandler.deleteWarp(args[0]);
             if (worked) {
-                commandSender.sendMessage(ChatColor.GREEN + " > " + args[0] + " has been deleted!");
+                commandSender.sendMessage(ChatColor.GREEN + "> " + args[0] + " has been deleted!");
             } else {
-                commandSender.sendMessage(ChatColor.RED + " > " + args[0] + " failed to be deleted!");
+                commandSender.sendMessage(ChatColor.RED + "> " + args[0] + " failed to be deleted!");
             }
             return true;
         }

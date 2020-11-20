@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>jawamaster</groupId>
     <artifactId>JawaCommands</artifactId>
-    <version>1.15.X-1.1</version>
+    <version>1.16.X-1.2</version>
     <packaging>jar</packaging>
     <repositories>
         <repository>
@@ -15,13 +15,13 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <version>1.16.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>jawamaster</groupId>
             <artifactId>JawaPermissions</artifactId>
-            <version>1.15.X-1.2</version>
+            <version>1.16.X-1.2</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>net.jawasystems</groupId>
             <artifactId>JawaCore</artifactId>
-            <version>1.15.X-1.0</version>
+            <version>1.16.X-1.0</version>
         </dependency>
     </dependencies>
     <properties>

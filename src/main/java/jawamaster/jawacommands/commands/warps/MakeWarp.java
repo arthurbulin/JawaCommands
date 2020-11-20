@@ -17,6 +17,7 @@
 package jawamaster.jawacommands.commands.warps;
 
 import jawamaster.jawacommands.handlers.WarpHandler;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,10 +31,10 @@ public class MakeWarp implements CommandExecutor{
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
-        String usage = "/createwarp <name> <[public|private|permission]>";
+        String usage = "/makewarp <name> <[public|private|permission|game]>";
         
         if ((args == null) || (args.length < 1)){
-            commandSender.sendMessage("This command requires arguments! Usage: " + usage);
+            commandSender.sendMessage(ChatColor.RED + "> Error: Not enough arguments. Usage:" + ChatColor.GREEN + usage);
             return true;
         } else if (args.length == 1) { //By default create a public warp
             WarpHandler.createWarp((Player) commandSender, args[0], "public");
@@ -42,7 +43,7 @@ public class MakeWarp implements CommandExecutor{
             WarpHandler.createWarp((Player) commandSender, args[0], args[1]);
             return true;
         } else {
-            commandSender.sendMessage("Your command has too many arguments! Usage: " + usage);
+            commandSender.sendMessage(ChatColor.RED + "> Error: Too many arguments. Usage:" + ChatColor.GREEN + usage);
         }
         
         

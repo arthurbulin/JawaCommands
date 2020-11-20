@@ -45,12 +45,12 @@ public class Home implements CommandExecutor{
             if (!worked) player.sendMessage(ChatColor.RED + "> Error: That home doesn't exist. Run /home help for help.");
         } else {
             int action = 0;
-            if (args[0].equalsIgnoreCase("delete") || args[0].equals("d")) action = 1;
-            else if (args[0].equalsIgnoreCase("set") || args[0].equals("s")) action = 2;
-            else if (args[0].equalsIgnoreCase("replace") || args[0].equals("r")) action = 3;
-            else if (args[0].equalsIgnoreCase("info") || args[0].equals("i")) action = 4;
-            else if (args[0].equalsIgnoreCase("list") || args[0].equals("l")) action = 5;
-            else if (args[0].equalsIgnoreCase("help") || args[0].equals("h")) action = 6;
+            if (args[0].equalsIgnoreCase("delete")) action = 1;
+            else if (args[0].equalsIgnoreCase("set")) action = 2;
+            else if (args[0].equalsIgnoreCase("replace")) action = 3;
+            else if (args[0].equalsIgnoreCase("info")) action = 4;
+            else if (args[0].equalsIgnoreCase("list")) action = 5;
+            else if (args[0].equalsIgnoreCase("help")) action = 6;
 
             switch (action) {
                 case 0:

@@ -86,8 +86,8 @@ public class BackHandler {
      * @param topBack 
      */
     public static void sendBack(Player target, Location topBack){
-        if (topBack.getWorld().getBlockAt(topBack).getType().equals(Material.AIR)) {
-            topBack.setY(topBack.getWorld().getHighestBlockYAt(topBack));
+        if (topBack.getWorld().getBlockAt(topBack.subtract(0, 1, 0)).getType().equals(Material.AIR)) {
+            topBack.setY(topBack.getWorld().getHighestBlockYAt(topBack) + 2);
         }
         
         TPHandler.performSafeTeleport(target, topBack, PlayerTeleportEvent.TeleportCause.UNKNOWN);

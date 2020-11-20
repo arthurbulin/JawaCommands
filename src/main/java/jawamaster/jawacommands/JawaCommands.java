@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import jawamaster.jawacommands.commands.development.TestCommand;
 import jawamaster.jawacommands.handlers.CommandControlHandler;
-import jawamaster.jawacommands.handlers.KitHandler;
+import jawamaster.jawacommands.kit.KitHandler;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import jawamaster.jawacommands.handlers.WorldHandler;
 import jawamaster.jawacommands.listeners.FirstSpawnListener;
@@ -35,8 +35,6 @@ public class JawaCommands extends JavaPlugin {
    
     private static WarpHandler warpHandler;
    
-    private static JSONObject worldConfigurations;
-    
     public static HashMap<UUID, JSONArray> backStack;
     
     public static JSONObject worldSpawns;
@@ -52,7 +50,6 @@ public class JawaCommands extends JavaPlugin {
     public void onEnable(){
         plugin = this;
         loadConfig();
-        worldConfigurations = WorldHandler.LoadWorldConfigs();
         
         //TODO Make the warp handler into its own static instance
         
@@ -62,7 +59,7 @@ public class JawaCommands extends JavaPlugin {
         worldSpawns = WorldHandler.loadWorldSpawns();
         
         //TODO make the kithandler into its own static instance
-        kitHandler = new KitHandler(this);
+        //kitHandler = new KitHandler(this);
         
         //commandControlHandler
         commandControlHandler = new CommandControlHandler(plugin);
@@ -93,22 +90,15 @@ public class JawaCommands extends JavaPlugin {
         
     }
     
-    public static JSONObject getWorldConfiguration(){
-        return worldConfigurations;
-    }
-    
     public static JawaCommands getPlugin(){
         return plugin;
     }
-    
-
     
     public void loadConfig(){
         System.out.print("Loading configuration from file.");
         //Handle the config generation and loading
         this.saveDefaultConfig();
         config = this.getConfig();
-        
     }
     
     public static Configuration getConfiguration() {

@@ -160,6 +160,7 @@ public class TPHandler {
         //Inform the target of freezing
         if (JawaCommands.getConfiguration().getBoolean("safe-tp-messages", true)) {
             target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-freeze", "&e> You are being frozen for teleport.")));
+            target.setInvulnerable(true);
             //target.sendMessage(ChatColor.GREEN + "> You are being frozen for teleport.");
         }
 
@@ -177,6 +178,7 @@ public class TPHandler {
             safeTeleport.remove(target);
             if (JawaCommands.getConfiguration().getBoolean("safe-tp-messages", true)) {
                 target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-thaw", "&e> You have been thawed.")));
+                target.setInvulnerable(false);
                 //target.sendMessage(ChatColor.GREEN + "> You have been thawed.");
             }
             
