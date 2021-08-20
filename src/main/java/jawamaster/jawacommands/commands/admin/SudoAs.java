@@ -33,7 +33,7 @@ public class SudoAs implements CommandExecutor{
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         String usage = "/sudo <player> <command>";
-        Player target = JawaCommands.getPlugin().getServer().getPlayer(usage);
+        Player target = JawaCommands.getPlugin().getServer().getPlayer(args[0]);
         
         if ((args == null) || (args.length < 2)) {
             commandSender.sendMessage(ChatColor.RED + " > Error! You must specify a player and a command!");
@@ -44,9 +44,9 @@ public class SudoAs implements CommandExecutor{
             commandSender.sendMessage(ChatColor.RED + " > " + args[0] + " is not online!");
             return true;
         } else {
-            System.out.println("[SUDO] " + ((Player) commandSender).getUniqueId().toString() + " used sudo on " + target.getUniqueId().toString() + " with command: " + String.join(Arrays.toString(args).replace(args[0], "")).trim());
+            System.out.println("[SUDO] " + ((Player) commandSender).getName() + " used sudo on " + target.getName() + " with command: " + String.join(Arrays.toString(args).replace(args[0], "")).trim());
             commandSender.sendMessage(ChatColor.GREEN + " > " + args[0] + " is now executing command: " + ChatColor.WHITE + String.join(Arrays.toString(args).replace(args[0], "")).trim());
-            target.performCommand(String.join(Arrays.toString(args).replace(args[0], "")).trim());
+            target.performCommand(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
             return true;
         }
         

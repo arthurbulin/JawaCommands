@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package jawamaster.jawacommands;
+package jawamaster.jawacommands.commands.playeraugmentation;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -36,11 +36,11 @@ public class FullBright implements CommandExecutor {
             Player player = (Player) commandSender;
 
             if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
-                player.sendMessage(ChatColor.DARK_GREEN + " > Do not go gentle into that good night player.");
+                player.sendMessage(ChatColor.GREEN + "> Do not go gentle into that good night player.");
                 player.removePotionEffect(PotionEffectType.NIGHT_VISION);
             } else {
-                player.sendMessage(ChatColor.DARK_GREEN + " > Night vision activate!");
-                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1));
+                player.sendMessage(ChatColor.GREEN + "> Night vision activate!");
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1, false, false));
             }
 
         } else {

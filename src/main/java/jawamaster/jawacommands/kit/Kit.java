@@ -19,18 +19,28 @@ package jawamaster.jawacommands.kit;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
+import net.jawasystems.jawacore.PlayerManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -47,6 +57,8 @@ public class Kit {
         ANNOUNCE,
         PERMISSION
     }
+    
+    private static final Logger LOGGER = Logger.getLogger("Kit");
     private final JSONObject USERS;
     private final JSONObject ITEMS;
     private final String KITNAME;
@@ -110,14 +122,43 @@ public class Kit {
         //Create the blank METADATA object and populate it with metadata
         this.METADATA = new JSONObject();
         this.METADATA.put("CREATEDBY", player.getUniqueId().toString());
-        this.METADATA.put("CREATEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.METADATA.put("CREATEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         
         this.METADATA.put("LASTEDITEDBY", player.getUniqueId().toString());
-        this.METADATA.put("LASTEDITEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.METADATA.put("LASTEDITEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         
         this.METADATA.put("MCVERSION", JawaCommands.getPlugin().getServer().getVersion());
         
         this.KITNAME = kitname;
+        
+        assembleDetailMessage();
+    }
+    
+        /** Create a new kit.
+     * @param kitname The name for the kit
+     * @param player The player object of the player creating the kit.
+     * @param description Description of the kit
+     */
+    public Kit (String kitname, Player player, String description) {
+        //Create our blank internal objects
+        this.FLAGS = new JSONObject();
+        this.FLAGS.put("ENABLED", false);
+        
+        this.USERS = new JSONObject();
+        this.ITEMS = new JSONObject();
+        
+        //Create the blank METADATA object and populate it with metadata
+        this.METADATA = new JSONObject();
+        this.METADATA.put("CREATEDBY", player.getUniqueId().toString());
+        this.METADATA.put("CREATEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        
+        this.METADATA.put("LASTEDITEDBY", player.getUniqueId().toString());
+        this.METADATA.put("LASTEDITEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        
+        this.METADATA.put("MCVERSION", JawaCommands.getPlugin().getServer().getVersion());
+        
+        this.KITNAME = kitname;
+        this.FLAGS.put("DESCRIPTION", description);
         
         assembleDetailMessage();
     }
@@ -238,6 +279,10 @@ public class Kit {
         return null;
     }
     
+    public boolean hasDescription(){
+        return FLAGS.has("DESCRIPTION");
+    }
+    
     /** Returns the length of the cooldown in minutes. If there is no cooldown set
      * then this will return null
      * @return 
@@ -245,6 +290,10 @@ public class Kit {
     public Integer getCooldown() {
         if (FLAGS.has("COOLDOWN")) return FLAGS.getInt("COOLDOWN");
         return null;
+    }
+    
+    public boolean hasCooldown(){
+        return FLAGS.has("COOLDOWN");
     }
     
     /** Returns the announcement if it is set, if not, this returns null.
@@ -255,12 +304,20 @@ public class Kit {
         return null;
     }
     
+    public boolean hasAnnounce(){
+        return FLAGS.has("ANNOUNCE");
+    }
+    
     /** Return the player message if it is set. If not this returns null.
      * @return 
      */
     public String getMessage(){
         if (FLAGS.has("MESSAGE")) return FLAGS.getString("MESSAGE");
         return null;
+    }
+    
+    public boolean hasMessage(){
+        return FLAGS.has("MESSAGE");
     }
     
     /** Return the string type of single use. If it is not set this returns null.
@@ -273,8 +330,79 @@ public class Kit {
         return null;
     }
     
+    public boolean hasSingleUse(){
+        return FLAGS.has("SINGLEUSE");
+    }
+    
     public boolean isEnabled(){
         return FLAGS.getBoolean("ENABLED");
+    }
+    
+    public List<BaseComponent[]> getItems(boolean modifyable){
+        List<BaseComponent[]> msg = new ArrayList();
+        if (itemStacks.length == 0){
+            msg.add(new ComponentBuilder(" > There are no items in this kit!").color(ChatColor.GREEN).create());
+            return msg;
+        }
+        
+        int partitionSize = 4;
+        List<ItemStack> stack = Arrays.asList(itemStacks);
+        List<List<ItemStack>> partitions = new LinkedList();
+        for (int i = 0; i < stack.size(); i += partitionSize) {
+            partitions.add(stack.subList(i, Math.min(i + partitionSize, stack.size())));
+        }
+
+        for (List<ItemStack> itemStack : partitions) {
+            ComponentBuilder compBuilder = new ComponentBuilder(" > ").color(ChatColor.GREEN);
+            for (ItemStack item : itemStack) {
+                compBuilder.append(item.getType().toString() + ":").color(ChatColor.BLUE)
+                        .append(String.valueOf(item.getAmount())).color(ChatColor.WHITE);
+                if (modifyable) {
+                    compBuilder
+                            .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/kit modify " + KITNAME + " add " + item.getType().toString() + " "))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to modify")))
+                        .append("[X]").color(ChatColor.RED)
+                            .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/kit modify " + KITNAME + " add " + item.getType().toString() + " 0" ))
+                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to Remove")))
+                        .append(" ");
+                }
+            }
+
+            msg.add(compBuilder.create());
+        }
+        return msg;
+
+    }
+    
+    /** Return a user friendly set of messages to send to the player.
+     * @param admin
+     * @return 
+     */
+    public List<BaseComponent[]> getInfo(boolean admin){
+        List<BaseComponent[]> msg = new ArrayList();
+        
+        msg.add(new ComponentBuilder("> Information for ").color(ChatColor.GREEN).append(getKitName()).color(ChatColor.BLUE).create());
+        if (hasDescription()) {
+            msg.add(new ComponentBuilder(" > Description: ").color(ChatColor.GREEN).append(ChatColor.translateAlternateColorCodes('&', getDescription())).color(ChatColor.WHITE).create());
+        }
+        if (admin && hasAnnounce()) {
+            msg.add(new ComponentBuilder(" > Announce: ").color(ChatColor.GREEN).append(ChatColor.translateAlternateColorCodes('&', getAnnounce())).color(ChatColor.WHITE).create());
+        }
+        if (admin && hasMessage()) {
+            msg.add(new ComponentBuilder(" > Message: ").color(ChatColor.GREEN).append(ChatColor.translateAlternateColorCodes('&', getMessage())).color(ChatColor.WHITE).create());
+        }
+        
+        if (hasCooldown()) {
+            msg.add(new ComponentBuilder(" > Cooldown: ").color(ChatColor.GREEN).append(String.valueOf(getCooldown())).color(ChatColor.WHITE).create());
+        }
+        if (hasSingleUse()) {
+            msg.add(new ComponentBuilder(" > Single Use: ").color(ChatColor.GREEN).append(getSingleUse()).color(ChatColor.WHITE).create());
+        }
+        msg.add(new ComponentBuilder(" > Enabled: ").color(ChatColor.GREEN).append(String.valueOf(isEnabled())).color(ChatColor.WHITE).create());
+        
+        msg.addAll(getItems(admin));
+        
+        return msg;
     }
     
 //==============================================================================
@@ -458,9 +586,11 @@ public class Kit {
                     return USERS.has(player.getUniqueId().toString());
                 case "LIFE":
                     if (USERS.has(player.getUniqueId().toString())) {
-                        return (USERS.getInt("LIVES") < player.getStatistic(Statistic.DEATHS));
+                        System.out.println(USERS.getJSONObject(player.getUniqueId().toString()).getInt("LIVES"));
+                        System.out.println(player.getStatistic(Statistic.DEATHS));
+                        return !(USERS.getJSONObject(player.getUniqueId().toString()).getInt("LIVES") < player.getStatistic(Statistic.DEATHS));
                     } else {
-                        return true;
+                        return false;
                     }
                 default:
                     return false;
@@ -492,6 +622,11 @@ public class Kit {
     public boolean canUse(Player player){
         return player.hasPermission(KitHandler.KITBASEPERM + ".admin") || isPermissible(player) && isEnabled();
     }
+    
+    public void editedBy(Player player){
+        this.METADATA.put("LASTEDITEDBY", player.getUniqueId().toString());
+        this.METADATA.put("LASTEDITEDON", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    }
 
 //==============================================================================
 //                            Handle kit actions
@@ -502,46 +637,77 @@ public class Kit {
      * @return 
      */
     public boolean useKit(Player player){
-        return useKit(player, false);
+        return useKit(Arrays.asList(player), new ArrayList());
+        //return useKit(player, false);
     }
     
-    /** This allows a player to use a kit. This is backed by useKit(Player player, boolean overridePermission).
-     * Given boolean parameters allow the kit to be given without respect to kit configuration rules. Stats are
-     * tracked for the player no matter what.
-     * @param player
-     * @param overridePermission If this is set to TRUE then permission requirements in the config are ignored.
-     * @param overrideConfig If this is set to TRUE then all config restrictions are ignored and the kit is given. 
-     * @return 
+    /** If the kit has an ANNOUNCE set this will announce it to all online players.
+     * This translates color codes and replaces @p with the player's friendly name.
+     * @param player 
      */
-    public boolean useKit(Player player, boolean overridePermission, boolean overrideConfig){
-        if (overrideConfig){
-            //give kit to player no matter what
-            giveKitToPlayer(player);
-            trackPlayerUse(player);
-            return true;
-        } else {
-            return useKit(player, overridePermission);
-            
+    public void announce(Player player){
+        if (hasAnnounce()) {
+            String friendlyName = PlayerManager.getPlayerDataObject(player).getFriendlyName();
+            for (Player ply : Bukkit.getOnlinePlayers()) {
+                ply.sendMessage("*" + ChatColor.translateAlternateColorCodes('&', getAnnounce()).replaceAll("@p", friendlyName));
+            }
+        }
+    }
+    /** If the kit has an MESSAGE set this will send it to the player.
+     * This translates color codes and replaces @p with the player's friendly name.
+     * @param player 
+     */
+    public void message(Player player){
+        if (hasMessage()) {
+            String friendlyName = PlayerManager.getPlayerDataObject(player).getFriendlyName();
+            player.sendMessage("*" + ChatColor.translateAlternateColorCodes('&', getMessage()).replaceAll("@p", friendlyName));
         }
     }
     
-    /** This allows a player to use a kit. This is backed by useKit(Player player, boolean overridePermission).
-     * Giveing a boolean parameter allow the kit to be given without respect to kit permission rules. Stats are
+//    /** This allows a player to use a kit. This is backed by useKit(Player player, boolean overridePermission).
+//     * Given boolean parameters allow the kit to be given without respect to kit configuration rules. Stats are
+//     * tracked for the player no matter what.
+//     * @param player
+//     * @param overridePermission If this is set to TRUE then permission requirements in the config are ignored.
+//     * @param overrideConfig If this is set to TRUE then all config restrictions are ignored and the kit is given. 
+//     * @return 
+//     */
+//    public boolean useKit(Player player, boolean overridePermission, boolean overrideConfig){
+//        if (overrideConfig){
+//            //give kit to player no matter what
+//            giveKitToPlayer(player);
+//            trackPlayerUse(player);
+//            return true;
+//        } else {
+//            return useKit(player, overridePermission);
+//            
+//        }
+//    }
+    
+    /** This allows a player to use a kit.
+     * Giving a boolean parameter allow the kit to be given without respect to kit permission rules. Stats are
      * tracked for the player no matter what.
      * @param player
      * @param overridePermission If this is set to TRUE then permission requirements in the config are ignored.
      * @return 
      */
     public boolean useKit(Player player, boolean overridePermission) {
+        if (itemStacks.length == 0) {
+            player.sendMessage(ChatColor.RED + "> There are no items in that kit!");
+            return false;
+        }
         //If ignore permission or player has permission or player has admin permission
         if (overridePermission || isPermissible(player) || player.hasPermission(KitHandler.KITBASEPERM + ".admin")) {
             if (hasCooledDown(player)) { //Access kit cooldown
                 if (!usedOnce(player)) { //Access if used once
                     giveKitToPlayer(player);
                     trackPlayerUse(player);
+                    KitHandler.saveKits();
+                    announce(player);
+                    message(player);
                     return true;
                 } else {
-                    if (FLAGS.getString("USEONCE").equals("LIFE")) 
+                    if (FLAGS.getString("SINGLEUSE").equals("LIFE")) 
                         player.sendMessage(ChatColor.RED + "> That kit can only be used once per life!");
                     else
                         player.sendMessage(ChatColor.RED + "> That kit can only be used once!");
@@ -555,6 +721,51 @@ public class Kit {
             player.sendMessage(ChatColor.RED + "> You don't have permission to use that kit!");
             return false;
         }
+    }
+    
+    /** *  This allows a player to use a kit.Giving a boolean parameter allow the kit to be given without respect to kit permission rules.Stats are
+ tracked for the player no matter what.
+     * @param players
+     * @param overrides
+     * @return 
+     */
+    public boolean useKit(List<Player> players, List<String> overrides) {
+        
+        for (Player player : players){
+            if (itemStacks.length == 0) {
+                return false;
+            }
+            //If ignore permission or player has permission or player has admin permission
+            if (overrides.contains("ALL") || overrides.contains("PERMISSION") || isPermissible(player) || player.hasPermission(KitHandler.KITBASEPERM + ".admin")) {
+                if (overrides.contains("ALL") || overrides.contains("COOLDOWN") || hasCooledDown(player)) { //Access kit cooldown
+                    if (overrides.contains("ALL") || overrides.contains("USEONCE") || !usedOnce(player)) { //Access if used once
+                        giveKitToPlayer(player);
+                        trackPlayerUse(player);
+                        KitHandler.saveKits();
+                        if (!(overrides.contains("ALL") || overrides.contains("ANNOUNCE")))
+                            announce(player);
+                        if (!(overrides.contains("ALL") || overrides.contains("MESSAGE")))
+                            message(player);
+                        return true;
+                    } else {
+                        if (FLAGS.getString("SINGLEUSE").equals("LIFE")) {
+                            player.sendMessage(ChatColor.RED + "> That kit can only be used once per life!");
+                        } else {
+                            player.sendMessage(ChatColor.RED + "> That kit can only be used once!");
+                        }
+                        return false;
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "> That kit is still cooling down!");
+                    return false;
+                }
+            } else {
+                player.sendMessage(ChatColor.RED + "> You don't have permission to use that kit!");
+                return false;
+            }
+        }
+        //Pretty sure this is unreachable, but it shuts Netbeans up
+        return false;
     }
     
     /**
@@ -603,6 +814,7 @@ public class Kit {
      * @return
      */
     private void giveKitToPlayer(Player target) {
+        LOGGER.log(Level.INFO, "Giving {0} to player {1}", new Object[]{KITNAME, target.getName()});
         ItemStack[] notGiven = giveItemsToPlayer(itemStacks, target);
         handleNotGivenItems(notGiven, target);
     }
@@ -630,5 +842,7 @@ public class Kit {
             return true;
         }
     }
+    
+    
     
 }

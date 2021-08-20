@@ -45,6 +45,8 @@ public class JawaCommands extends JavaPlugin {
     
     private static Configuration config;
     
+    private static boolean debug;
+    
     
     @Override
     public void onEnable(){
@@ -65,6 +67,7 @@ public class JawaCommands extends JavaPlugin {
         commandControlHandler = new CommandControlHandler(plugin);
         
         warpHandler = new WarpHandler();
+        KitHandler.loadKits();
         
         this.getCommand("testcommand").setExecutor(new TestCommand());
 
@@ -99,10 +102,15 @@ public class JawaCommands extends JavaPlugin {
         //Handle the config generation and loading
         this.saveDefaultConfig();
         config = this.getConfig();
+        debug = config.getBoolean("debug", false);
     }
     
     public static Configuration getConfiguration() {
         return config;
+    }
+    
+    public static boolean isDebug(){
+        return debug;
     }
     
 

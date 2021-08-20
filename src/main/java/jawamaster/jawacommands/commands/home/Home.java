@@ -30,16 +30,16 @@ public class Home implements CommandExecutor{
     public boolean onCommand(CommandSender commandSender, Command arg1, String arg2, String[] args) {
         Player player = (Player) commandSender;
         String[] usage = {
-            ChatColor.GREEN + " > " + ChatColor.WHITE +  "/home <[d|sr|s|i|l|h]> <homename>",
+            ChatColor.GREEN + " > " + ChatColor.WHITE +  "/home <[set|replace|info|list|delete|help]> <homename>",
             ChatColor.GREEN + " > " + ChatColor.WHITE + "Running this command without arguments will teleport you to your default home (named \"home\")",
             ChatColor.GREEN + " > " + ChatColor.WHITE + "Running /home bed will teleport you to your bed. You " + ChatColor.RED + "CANNOT" + ChatColor.WHITE + " set 'bed' as a home except by sleeping in a bed!",
             ChatColor.GREEN + " > " + ChatColor.WHITE + "Running /home <homename> will send you right to that home.",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "delete (d) removes the specified home",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "set (s) creates a new specified home",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "replace (r) creates a new home by replacing an existing",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "info (i) gives information about a specific home",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "list (l) lists the available homes",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "help (h) prints this help"};
+            ChatColor.GREEN + " > " + ChatColor.WHITE + "delete removes the specified home",
+            ChatColor.GREEN + " > " + ChatColor.WHITE + "set creates a new specified home",
+            ChatColor.GREEN + " > " + ChatColor.WHITE + "replace creates a new home by replacing an existing",
+            ChatColor.GREEN + " > " + ChatColor.WHITE + "info gives information about a specific home",
+            ChatColor.GREEN + " > " + ChatColor.WHITE + "list lists the available homes",
+            ChatColor.GREEN + " > " + ChatColor.WHITE + "help prints this help"};
         if ((args == null) || (args.length == 0)){
             boolean worked = HomeHandler.sendToHome(player, "home");
             if (!worked) player.sendMessage(ChatColor.RED + "> Error: That home doesn't exist. Run /home help for help.");

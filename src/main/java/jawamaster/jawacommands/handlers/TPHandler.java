@@ -47,13 +47,13 @@ public class TPHandler {
     public static void tpRequest(int type, Player player, Player target) {
         String playerName = ChatColor.translateAlternateColorCodes('&', player.getDisplayName());
         String targetName = ChatColor.translateAlternateColorCodes('&', target.getDisplayName());
-        player.sendMessage(ChatColor.DARK_GREEN + " > Sending request to " + targetName);
+        player.sendMessage(ChatColor.GREEN + " > Sending request to " + targetName);
 
         if (type == 0) { //To tpa to a player
-            target.sendMessage(ChatColor.GREEN + " > " + playerName + " has requested to teleport to you.");
+            target.sendMessage(ChatColor.GREEN + "> " + playerName + ChatColor.RESET + ChatColor.GREEN + " has requested to teleport to you.");
             currentTPRequest.put(target.getName(), player.getName());
         } else if (type == 1) { //to summona a player to you
-            target.sendMessage(ChatColor.GREEN + " > " + playerName + " has requested YOU teleport to them.");
+            target.sendMessage(ChatColor.GREEN + "> " + playerName + ChatColor.RESET + ChatColor.GREEN + " has requested YOU teleport to them.");
             currentSummonRequest.put(target.getName(), player.getName());
         }
 
@@ -64,11 +64,11 @@ public class TPHandler {
     public static void killRequest(Player target) {
         if (currentTPRequest.containsKey(target.getName())) {
             Player player = Bukkit.getServer().getPlayer(currentTPRequest.get(target.getName()));
-            player.sendMessage(ChatColor.RED + " > Your teleport request timed out.");
+            player.sendMessage(ChatColor.RED + "> Your teleport request timed out.");
             currentTPRequest.remove(target.getName());
         } else if (currentSummonRequest.containsKey(target.getName())) {
             Player player = Bukkit.getServer().getPlayer(currentSummonRequest.get(target.getName()));
-            player.sendMessage(ChatColor.RED + " > Your summon request timed out.");
+            player.sendMessage(ChatColor.RED + "> Your summon request timed out.");
             currentSummonRequest.remove(target.getName());
         }
 
@@ -78,15 +78,15 @@ public class TPHandler {
         if (currentTPRequest.containsKey(player.getName())) {
             Player target = Bukkit.getServer().getPlayer(currentTPRequest.get(player.getName()));
             currentTPRequest.remove(player.getName());
-            player.sendMessage(ChatColor.DARK_GREEN + " > Teleporting " + target.getDisplayName() + " to you.");
-            target.sendMessage(ChatColor.DARK_GREEN + " > Teleporting you to " + player.getDisplayName());
+            player.sendMessage(ChatColor.GREEN + "> Teleporting " + target.getDisplayName() + ChatColor.RESET + ChatColor.GREEN + " to you.");
+            target.sendMessage(ChatColor.GREEN + "> Teleporting you to " + player.getDisplayName());
             target.teleport(player, PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else if (currentSummonRequest.containsKey(player.getName())) {
             Player target = Bukkit.getServer().getPlayer(currentSummonRequest.get(player.getName()));
             currentSummonRequest.remove(player.getName());
-            player.sendMessage(ChatColor.DARK_GREEN + " > Teleporting you to " + target.getDisplayName());
-            target.sendMessage(ChatColor.DARK_GREEN + " > Teleporting " + player.getDisplayName() + " to you.");
+            player.sendMessage(ChatColor.GREEN + "> Teleporting you to " + target.getDisplayName());
+            target.sendMessage(ChatColor.GREEN + "> Teleporting " + player.getDisplayName() + ChatColor.RESET + ChatColor.GREEN + " to you.");
             player.teleport(target, PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         }

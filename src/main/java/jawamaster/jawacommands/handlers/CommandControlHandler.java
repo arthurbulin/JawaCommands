@@ -17,17 +17,18 @@
 package jawamaster.jawacommands.handlers;
 
 import java.util.HashMap;
-import jawamaster.jawacommands.FullBright;
+import jawamaster.jawacommands.commands.playeraugmentation.FullBright;
 import jawamaster.jawacommands.commands.ChangeGameMode;
 import jawamaster.jawacommands.commands.Colors;
 import jawamaster.jawacommands.commands.ComeHere;
-import jawamaster.jawacommands.commands.FlySpeed;
+import jawamaster.jawacommands.commands.playeraugmentation.FlySpeed;
 import jawamaster.jawacommands.commands.GoThere;
-import jawamaster.jawacommands.commands.PlayerTime;
-import jawamaster.jawacommands.commands.PlayerWeather;
-import jawamaster.jawacommands.commands.SurvivalFly;
+import jawamaster.jawacommands.commands.RepairCommand;
+import jawamaster.jawacommands.commands.playeraugmentation.PlayerTime;
+import jawamaster.jawacommands.commands.playeraugmentation.PlayerWeather;
+import jawamaster.jawacommands.commands.playeraugmentation.SurvivalFly;
 import jawamaster.jawacommands.commands.TPAccept;
-import jawamaster.jawacommands.commands.WalkSpeed;
+import jawamaster.jawacommands.commands.playeraugmentation.WalkSpeed;
 import jawamaster.jawacommands.commands.admin.Freeze;
 import jawamaster.jawacommands.commands.admin.SudoAs;
 import jawamaster.jawacommands.commands.development.BackCommand;
@@ -35,6 +36,7 @@ import jawamaster.jawacommands.kit.KitCommand;
 import jawamaster.jawacommands.commands.development.RandomTP;
 import jawamaster.jawacommands.commands.home.Home;
 import jawamaster.jawacommands.commands.home.HomeInfo;
+import jawamaster.jawacommands.commands.home.OtherHome;
 import jawamaster.jawacommands.commands.spawn.RemoveSpawn;
 import jawamaster.jawacommands.commands.spawn.SetSpawn;
 import jawamaster.jawacommands.commands.spawn.Spawn;
@@ -46,6 +48,7 @@ import jawamaster.jawacommands.commands.warps.WarpBlackList;
 import jawamaster.jawacommands.commands.warps.WarpInfo;
 import jawamaster.jawacommands.commands.warps.WarpWhitelist;
 import jawamaster.jawacommands.commands.warps.YeetPort;
+import jawamaster.jawacommands.kit.GiveKit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONObject;
@@ -66,6 +69,7 @@ public class CommandControlHandler {
         commandTabs = new HashMap();
         commandMap.put("colors", new Colors());
         commandMap.put("kit", new KitCommand());
+        commandMap.put("givekit", new GiveKit());
 
         commandMap.put("home", new Home());
 //        commandMap.put("sethome", new setHome());
@@ -110,6 +114,10 @@ public class CommandControlHandler {
         commandMap.put("walkspeed", new WalkSpeed());
         
         commandMap.put("warpinfo", new WarpInfo());
+        
+        commandMap.put("otherhome", new OtherHome());
+        
+        commandMap.put("repair", new RepairCommand());
 
         registerCommands();
         buildTabCompletionTable();

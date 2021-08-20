@@ -66,7 +66,11 @@ commands:
   kit:
     description: 'Used to create, modify, and give kits'
     permission: jawacommands.kit.user
-    usage: '/kit -h for full instructions'
+    usage: 'Run /kit for full instructions'
+  givekit:
+    description: 'Used to give a kit to a player by staff, commandblock, or console'
+    permission: jawacommands.kit.other
+    usage: 'Run /givekit for full instructions'
   yeetport:
     description: 'Yeets a player into the air before teleporting to a warp'
     permission: jawacommands.yeetport
@@ -106,6 +110,14 @@ commands:
     description: Sets a player's walk speed
     usage: "/walkspeed <[1|2|3|4|5|6|7|8|9|10]>"
     permission: "jawacommands.walkspeed"
+  otherhome:
+    description: View another player's home data
+    usage: "/otherhome <player name> <[info|homename]> <[homename]>"
+    permission: "jawacommands.home.other"
+  repair:
+    description: Repair the item held in hand
+    usage: "/repair"
+    permission: "jawacommands.items.repair"
     
     
 permissions:
@@ -118,6 +130,12 @@ permissions:
   jawacommands.kit.user:
       description: Allows a user to use the kit command
       default: false
+  jawacommands.kit.admin:
+      description: Allows admin access to the kit command
+      default: op
+  jawacommands.kit.other:
+      description: Allows admin access to the givekit command
+      default: op
   jawacommands.spawn.remove:
       description: Allows a user to remove a spawn
       default: false
@@ -207,4 +225,10 @@ permissions:
       default: op
   jawacommands.walkspeed:
       description: "Allows a player to set their walk speed"
+      default: op
+  jawacommands.home.other:
+      description: "Allows staff to view/tp to another player's homes"
+      default: op
+  jawacommands.items.repair:
+      description: "Allows a user to repair the item in hand"
       default: op

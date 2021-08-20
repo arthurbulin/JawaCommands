@@ -16,9 +16,10 @@
  */
 package jawamaster.jawacommands.listeners;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
 import net.jawasystems.jawacore.handlers.LocationDataHandler;
-import jawamaster.jawapermissions.JawaPermissions;
 import net.jawasystems.jawacore.PlayerManager;
 import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.World;
@@ -34,18 +35,33 @@ import org.json.JSONObject;
  */
 public class SpawnListener implements Listener {    
     
+    private static final Logger LOGGER = Logger.getLogger("onPayerRespawnEvent");
     @EventHandler
     public void onPayerRespawnEvent(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
         World world = event.getPlayer().getWorld();
+        
         //"player, world, bed, customspawn"
         //System.out.println("onPlayerRespawnEvent." + event.getPlayer().getName() + ","+event.getPlayer().getWorld() + ","+ player.getBedSpawnLocation() + "," + JawaCommands.worldSpawns.has(world.getName()));
         
+        if (JawaCommands.isDebug()){
+            LOGGER.log(Level.INFO, "bed:{0} anchor:{1} worldspawn:{2} existsworld:{3} existsrank:{4}", 
+                    new Object[]{event.isBedSpawn(), event.isAnchorSpawn(), event.getRespawnLocation().equals(world.getSpawnLocation()), JawaCommands.worldSpawns.has(world.getName()), "Ignore this value"});
+        }
         //If player doesn't have a bed location and there is an applicaple place in the world
-        if (JawaCommands.worldSpawns.has(world.getName()) 
-                && player.getBedSpawnLocation() == null
-                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank())){
+        if (
+                //Don't interrupt bed spawns
+                !event.isBedSpawn() 
+                //Don't interrupt spawn anchors
+                && !event.isAnchorSpawn() 
+                //Interrupt default world spawns
+                && event.getRespawnLocation().distance(world.getSpawnLocation()) < 25
+                //Only if a custom spawn for this world exists
+                && JawaCommands.worldSpawns.has(world.getName()) 
+             //   && player.getBedSpawnLocation() == null
+                //Only if there is a specific one for that player rank
+                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank())) {
             
             JSONObject worldSpawns = JawaCommands.worldSpawns.getJSONObject(world.getName());
             //for (String perm : worldSpawns.keySet()) {

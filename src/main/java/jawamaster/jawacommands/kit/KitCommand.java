@@ -16,10 +16,9 @@
  */
 package jawamaster.jawacommands.kit;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import net.jawasystems.jawacore.utils.ArgumentParser;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -46,34 +45,97 @@ public class KitCommand implements CommandExecutor {
     /kit modify <name> singleuse [<LIFE|ONCE>]
     /kit modify <name> permission [<permission>]
     /kit modify <name> add <item> <#>
-    /kit modify <name> remove <item>
     /kit modify <name> delete
     /kit modify <name> <enable|disable>
     */
+    
+    public static final List<String> tabs = new ArrayList(Arrays.asList("list","help","info","items","create","modify"));
+    public static final List<String> tabsTwo = new ArrayList(Arrays.asList("description","message","announce","cooldown","singleuse","permission","add","delete","enable","disable"));
+    
     @Override
     public boolean onCommand(CommandSender commandSender, Command cmnd, String string, String[] args) {
-        String matchString = String.join(" ", args);
-        
-        if (args[0].matches("(?i)li?s?t?")) {
-            //list
-            KitHandler.sendListMessage((Player) commandSender);
+        Player player = (Player) commandSender;
+        boolean admin = player.hasPermission(KitHandler.KITADMINPERM);
+        if (args.length == 0){
+            sendHelpMessage(commandSender, 1);
         } else if (args[0].matches("(?i)he?l?p?")) {
             //help message
-            if (args.length > 1 && args[1].matches("^[0-3]$")) {
+            if ( admin && args.length > 1) {
+                try {
                 sendHelpMessage(commandSender, Integer.valueOf(args[1]));
+                } catch (NumberFormatException e){
+                    sendHelpMessage(commandSender, 1);
+                }
             } else {
                 sendHelpMessage(commandSender, 1);
             }
-        } else if (args[0].matches("(?i)inf?o?")) {
+            
+        } else if (args[0].matches("(?i)li?s?t?")) {
+            //list
+            KitHandler.sendListMessage((Player) commandSender);
+        } else if (admin && args[0].matches("(?i)inf?o?")) {
             //info
+            if (args.length > 1) {
+                KitHandler.sendKitInfo(player, args[1]);
+            } else {
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit info <name> " + ChatColor.YELLOW + "- See a description of <name>.");
+            }
         } else if (args[0].matches("(?i)ite?m?s?")) {
             //list items in kit
-        } else if (args[0].matches("(?i)cr?e?a?t?")) {
+            if (args.length > 1) {
+                KitHandler.sendKitItemsInfo(player, args[1]);
+            } else {
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit items <name> " + ChatColor.YELLOW + "- See the items in <name>.");
+            }
+        } else if (admin && args[0].matches("(?i)cr?e?a?t?e?")) {
             //create kit
-        } else if (args[0].matches("(?i)mo?d?i?f?y?")) {
+            if (args.length > 2) {
+                KitHandler.createKit(player, args[1], String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+            } else {
+                KitHandler.createKit(player, args[1]);
+            }
+            
+        } else if (admin && args[0].matches("(?i)mo?d?i?f?y?")) {
             //modify kit
+            if (args.length <= 2) {
+                sendHelpMessage(commandSender, 1);
+            } else {
+                //KitHandler.modifyKit(player, args[1], args[2], String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+                if (args[2].matches("(?i)desc?r?i?p?t?i?o?n?")){
+                    modKit(player, args, "DESCRIPTION");
+                } else if (args[2].matches("(?i)me?s?s?a?g?e?")){
+                    modKit(player, args, "MESSAGE");
+                } else if (args[2].matches("(?i)ann?o?u?n?c?e?")){
+                    modKit(player, args, "ANNOUNCE");
+                } else if (args[2].matches("(?i)si?n?g?l?e?u?s?e?")){
+                    modKit(player, args, "SINGLEUSE");
+                } else if (args[2].matches("(?i)co?o?l?d?o?w?n?")){
+                    modKit(player, args, "COOLDOWN");
+                } else if (args[2].matches("(?i)pe?r?m?i?s?s?i?o?n?")){
+                    modKit(player, args, "PERMISSION");
+                } else if (args[2].matches("(?i)add?")){
+                    if (args.length >= 5) {
+                        KitHandler.addItemsToKit(player, args[1], args[3], args[4]);
+                    } else {
+                        commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> add <item> <#> ");
+                    }
+                } else if (args[2].matches("(?i)del?e?t?e?")){
+                    modKit(player, args, "DELETE");
+                } else if (args[2].matches("(?i)(en?a?b?l?e?)")){
+                    modKit(player, args, "ENABLE");
+                } else if (args[2].matches("(?i)dis?a?b?l?e?")){
+                    modKit(player, args, "DISABLE");
+                } else {
+                    player.sendMessage(ChatColor.RED + "> Error: " + args[2] + " is not an understood modify term");
+                }
+            }
         } else {
-            //help message
+            
+            if (KitHandler.kitExists(args[0])){
+                KitHandler.useKit(player, args[0]);
+            } else {
+                sendHelpMessage(commandSender, 1);
+            }
         }
         
         
@@ -167,6 +229,14 @@ public class KitCommand implements CommandExecutor {
         
     }
     
+    private static void modKit(Player player, String[] args, String flag){
+        if (args.length == 3) {
+            KitHandler.modifyKit(player, args[1], flag, "");
+        } else {
+            KitHandler.modifyKit(player, args[1], flag, String.join(" ", Arrays.copyOfRange(args, 3, args.length)));
+        }
+    }
+    
     private static void sendHelpMessage(CommandSender commandSender, int page) {
         if (!commandSender.hasPermission(KitHandler.KITBASEPERM + ".admin")) {
             commandSender.sendMessage(ChatColor.GREEN + "> Kit Command Help:");
@@ -192,11 +262,15 @@ public class KitCommand implements CommandExecutor {
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> singleuse [<LIFE|ONCE>] ");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> permission [<permission>] ");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> add <item> <#> ");
-                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> remove <item>");
+                //commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> remove <item>");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> delete ");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit modify <name> <enable|disable> ");
                 break;
             default:
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit <name> " + ChatColor.YELLOW + "- Get this kit.");
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit help " + ChatColor.YELLOW + "- This help message.");
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit info <name> " + ChatColor.YELLOW + "- See a description of <name>.");
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit items <name> " + ChatColor.YELLOW + "- See the items in <name>.");
                 break;
         }
     }

@@ -36,12 +36,12 @@ import org.bukkit.entity.Player;
  */
 public class WarpWhitelist implements CommandExecutor{
 
-    private List<UUID> targets = new ArrayList();
+    private List<UUID> targets;
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String arg0, String[] args) {
         String usage = "/wlwarp <warp name> <add|remove> <player name>";
         Warp warp;
-        
+        targets = new ArrayList();
         if (args == null || args.length == 0) {
             commandSender.sendMessage(ChatColor.RED + " > Usage: " + usage);
             return true;
@@ -70,11 +70,13 @@ public class WarpWhitelist implements CommandExecutor{
                     targets.forEach((playerUUID) -> {
                         if (args[1].matches("ad?d?")) {
                             warp.addToWhiteList(playerUUID);
+                            commandSender.sendMessage(ChatColor.GREEN + "> Adding " + targets.size() + " uuid(s) to the warp whitelist.");
                         } else if (args[1].matches("re?m?o?v?e?")) {
                             warp.removeFromWhitelist(playerUUID.toString());
+                            commandSender.sendMessage(ChatColor.GREEN + "> Removing " + targets.size() + " uuid(s) from the warp whitelist.");
                         }
                     });
-                    commandSender.sendMessage(ChatColor.GREEN + "> Adding " + targets.size() + " uuid(s) to the warp whitelist.");
+                    
                     WarpHandler.updateWarp(warp);
                 }
             } else {

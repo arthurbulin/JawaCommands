@@ -35,12 +35,12 @@ public class WarpCommand implements CommandExecutor {
 
     public final String OTHERPERMISSION = "jawacommands.warp.other";
     public final String USAGE = ChatColor.GREEN + "> /warp <warp> [other|@p|@a] [override]. Run without any arguments to list the warps you have access to.";
-    private List<Player> targets = new ArrayList();
+    private List<Player> targets;
     
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         //if no args print list of warps
-
+        targets = new ArrayList();
         if (args == null || args.length == 0) {
             WarpHandler.listWarps((Player) commandSender);
             return true;
@@ -60,9 +60,11 @@ public class WarpCommand implements CommandExecutor {
                             target.sendMessage(ChatColor.RED + " Error: You do not have permission to visit this warp.");
                         }
                     });
+                } else {
+                    commandSender.sendMessage(ChatColor.RED + "> That warp does not exist");
                 }
             }
-        } else if (args.length > 3 && commandSender.hasPermission(OTHERPERMISSION)) { // send a player to a warp with no respect to the player's permissions
+        } else if (args.length >= 3 && commandSender.hasPermission(OTHERPERMISSION)) { // send a player to a warp with no respect to the player's permissions
             if (args[2].equalsIgnoreCase("override")) {
                 if (resolveSelectors(args[1], commandSender)) {
                     if (WarpHandler.warpExists(args[0])) {

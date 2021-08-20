@@ -16,9 +16,10 @@
  */
 package jawamaster.jawacommands.listeners;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
 import net.jawasystems.jawacore.handlers.LocationDataHandler;
-import jawamaster.jawapermissions.JawaPermissions;
 import net.jawasystems.jawacore.PlayerManager;
 import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.World;
@@ -32,13 +33,17 @@ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
  * @author alexander
  */
 public class FirstSpawnListener implements Listener {
-
+    private static final Logger LOGGER = Logger.getLogger("onPlayerSpawnLocationEvent");
     @EventHandler
     public void onPlayerSpawnLocationEvent(PlayerSpawnLocationEvent event) {
         Player player = event.getPlayer();
         PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
         World world = event.getPlayer().getWorld();
 
+//        if (JawaCommands.isDebug()){
+//            LOGGER.log(Level.INFO, "existsworld:{0} existsrank:{1} worldspawn:{2}", 
+//                    new Object[]{JawaCommands.worldSpawns.has(world.getName()), JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank()),event.getSpawnLocation().equals(world.getSpawnLocation())});
+//        }
         //player, world, bed, custom
         //System.out.println("onPlayerSpawnLocationEvent Player: " + event.getPlayer().getName() 
          //       + ","+world.getName() 
@@ -49,8 +54,9 @@ public class FirstSpawnListener implements Listener {
 //        if (!player.hasPlayedBefore() && JawaCommands.worldSpawns.has(world.getName())) {
         //If world has spawn set AND if worldspawn has one named after their rank, send them to the one named after their rank
         if (JawaCommands.worldSpawns.has(world.getName()) 
-                && player.getBedSpawnLocation() == null
-                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank())) {
+            //    && player.getBedSpawnLocation() == null
+                && JawaCommands.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank())
+                && event.getSpawnLocation().distance(world.getSpawnLocation()) < 25) {
             //if that world has spawns
             //if that world has a spawn named that rank
             //if the player spawn location equals the world default spawn

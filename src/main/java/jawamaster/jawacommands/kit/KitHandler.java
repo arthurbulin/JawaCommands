@@ -17,32 +17,24 @@
 package jawamaster.jawacommands.kit;
 
 import net.jawasystems.jawacore.handlers.JSONHandler;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
+import net.jawasystems.jawacore.handlers.MaterialHandler;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Content;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
-import org.bukkit.block.CommandBlock;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 /**
@@ -62,22 +54,43 @@ public class KitHandler {
     
     private static List<BaseComponent[]> listMessage;
     public static final String KITBASEPERM = "jawacommands.kit";
+    public static final String KITADMINPERM = "jawacommands.kit.admin";
 
     /** Creates a blank kit with default values. This creates the kit object in a 
-     * temporary state. It contains no items or configurations, only Metadata, if
+     * temporary state.It contains no items or configurations, only Metadata, if
      * it is not modified it will be wiped out on next reload.
+     * @param player
      * @param kitName
-     * @param commandSender
      * @return
      */
-    public static boolean createKit(String kitName, CommandSender commandSender) {
+    public static boolean createKit(Player player, String kitName) {
         if (KITS.containsKey(kitName)) {
-            commandSender.sendMessage(ChatColor.RED + "> Error: That kit already exists! To recreate it remove it first or just modify it!");
+            player.sendMessage(ChatColor.RED + "> Error: That kit already exists! To recreate it remove it first or just modify it!");
             return false;
         } else {
-            KITS.put(kitName, new Kit(kitName, (Player) commandSender));
+            KITS.put(kitName, new Kit(kitName, player));
             saveKits();
-            commandSender.sendMessage(ChatColor.GREEN + "> Kit " + ChatColor.BLUE + kitName + ChatColor.GREEN + " created!");
+            player.sendMessage(ChatColor.GREEN + "> Kit " + ChatColor.BLUE + kitName + ChatColor.GREEN + " created!");
+            return true;
+        }
+    }
+    
+    /** Creates a blank kit with default values. This creates the kit object in a 
+     * temporary state.It contains no items or configurations, only Metadata, if
+     * it is not modified it will be wiped out on next reload.
+     * @param player
+     * @param kitName
+     * @param description
+     * @return
+     */
+    public static boolean createKit(Player player, String kitName, String description) {
+        if (KITS.containsKey(kitName)) {
+            player.sendMessage(ChatColor.RED + "> Error: That kit already exists! To recreate it remove it first or just modify it!");
+            return false;
+        } else {
+            KITS.put(kitName, new Kit(kitName, player, description));
+            saveKits();
+            player.sendMessage(ChatColor.GREEN + "> Kit " + ChatColor.BLUE + kitName + ChatColor.GREEN + " created!");
             return true;
         }
     }
@@ -98,6 +111,103 @@ public class KitHandler {
             commandSender.sendMessage(ChatColor.GREEN + " > Kit " + ChatColor.BLUE + kitName + ChatColor.GREEN + " removed!");
             return true;
         }
+    }
+    
+    public static void modifyKit(Player player, String kitName, String flag, String flagValue){
+        if (validateKit(kitName, player)) {
+            switch (flag) {
+                case "COOLDOWN":
+                    try {
+                        int value = Integer.valueOf(flagValue);
+                        KITS.get(kitName).setCoolDown(value);
+                        completeModify(player, kitName, flag, flagValue);
+                    } catch (NumberFormatException ex) {
+                        player.sendMessage(ChatColor.RED + "> Error: The value for COOLDOWN must be an integer!");
+                    }
+                    break;
+                case "DESCRIPTION":
+                    KITS.get(kitName).setDescription(flagValue);
+                    completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "SINGLEUSE":
+                    KITS.get(kitName).setSingleUse(flagValue);
+                    completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "MESSAGE":
+                    KITS.get(kitName).setMessage(flagValue);
+                    completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "ANNOUNCE":
+                    KITS.get(kitName).setAnnounce(flagValue);
+                    completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "PERMISSION":
+                    KITS.get(kitName).setPermission(flagValue);
+                    completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "DELETE":
+                    // TODO add confirmation logic
+                    KITS.remove(kitName);
+                    saveKits();
+                    //completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "ENABLE":
+                    KITS.get(kitName).enable();
+                    KITS.get(kitName).editedBy(player);
+                    saveKits();
+                    player.sendMessage(ChatColor.GREEN + "> " + kitName + " has been enabled");
+                    //completeModify(player, kitName, flag, flagValue);
+                    break;
+                case "DISABLE":
+                    KITS.get(kitName).disable();
+                    KITS.get(kitName).editedBy(player);
+                    saveKits();
+                    player.sendMessage(ChatColor.GREEN + "> " + kitName + " has been disabled");
+                    break;
+                default:
+                    player.sendMessage(INVALIDFLAG);
+                    break;
+            }
+        }
+    }
+    
+    public static void addItemsToKit(Player player, String kitName, String item, String count){
+        Material material = MaterialHandler.getMaterial(item);
+        if (material == null){
+            player.sendMessage(ChatColor.RED + "> Error: That is not a valid material!");
+        } else {
+            try {
+                int quantity = Integer.valueOf(count);
+                KITS.get(kitName).modifyItems(material, quantity);
+                KITS.get(kitName).editedBy(player);
+                saveKits();
+                if (quantity <= 0){
+                    player.sendMessage(ChatColor.GREEN + "> " + material.toString() + " removed from kit " + kitName);
+                } else {
+                    player.sendMessage(ChatColor.GREEN + "> " + material.toString() + " quantity set to " + count);
+                }
+            } catch (NumberFormatException e){
+                player.sendMessage(ChatColor.RED + "> Error: The item quantity must be an integer!");
+            }
+            
+        }
+    }
+    
+    private static void completeModify(Player player, String kitName, String flag, String flagValue){
+        KITS.get(kitName).editedBy(player);
+        saveKits();
+        if (flag.equalsIgnoreCase("cooldown")) {
+            if (flagValue.equals("0")){
+                player.sendMessage(ChatColor.GREEN + "> COOLDOWN for " + kitName + " has been removed");
+            } else {
+                player.sendMessage(ChatColor.GREEN + "> COOLDOWN for " + kitName + " has been set to: " + flagValue + " minutes");
+            }
+        } else if (flagValue.equals("")){
+            player.sendMessage(ChatColor.GREEN + "> " + flag.toUpperCase() + " for " + kitName + " has been removed");
+        } else {
+            player.sendMessage(ChatColor.GREEN + "> " + flag.toUpperCase() + " for " + kitName + " has been set to: " + ChatColor.translateAlternateColorCodes('&',flagValue));
+        }
+        
     }
 
     /** Loads the kits.json file and builds a Kit object for each entry.
@@ -133,6 +243,49 @@ public class KitHandler {
         return KITS.keySet();
     }
     
+    /** If the kit exists this will return true. If not it will send a message to the player
+     * that it does not exist and return false.
+     * @param kitName
+     * @param player
+     * @return 
+     */
+    private static boolean validateKit(String kitName, Player player){
+        if (kitExists(kitName)) return true;
+        else {
+            kitDoesntExist(player);
+            return false;
+        }
+    }
+    
+    /** If the kit exists this will return true. If not it will send a message to the CommandSender
+     * that it does not exist and return false.
+     * @param kitName
+     * @param commandSender
+     * @return 
+     */
+    public static boolean validateKit(String kitName, CommandSender commandSender){
+        if (kitExists(kitName)) return true;
+        else {
+            commandSender.sendMessage(NOTEXISTINGKIT);
+            return false;
+        }
+    }
+    
+    /** Returns true if a kit exists, false if not.
+     * @param kitName
+     * @return 
+     */
+    public static boolean kitExists(String kitName){
+        return KITS.containsKey(kitName);
+    }
+    
+    /** Send the player a message that the kit doesn't exist.
+     * @param player 
+     */
+    public static void kitDoesntExist(Player player){
+        player.sendMessage(NOTEXISTINGKIT);
+    }
+    
     public static void sendListMessage(Player player){
         List<Kit> tmpkits = new ArrayList();
         for (Kit kit : KITS.values()){
@@ -163,6 +316,49 @@ public class KitHandler {
             BaseComponent[] baseComp = compBuilder.create();
             player.spigot().sendMessage(baseComp);
         }
+    }
+    
+    /** Send kit info message to player for kit specified.
+     * @param player
+     * @param kitName 
+     */
+    public static void sendKitInfo(Player player, String kitName){
+        if (kitExists(kitName)) {
+            for (BaseComponent[] baseComp : KITS.get(kitName).getInfo(player.hasPermission("jawacommands.kit.admin"))){
+                player.spigot().sendMessage(baseComp);
+            }
+        } else {
+            kitDoesntExist(player);
+        }
+    }
+    
+    /** Send kit info message to player for kit specified.
+     * @param player
+     * @param kitName 
+     */
+    public static void sendKitItemsInfo(Player player, String kitName){
+        if (kitExists(kitName)) {
+            player.sendMessage(ChatColor.GREEN + "> Items for " + ChatColor.BLUE + kitName);
+            for (BaseComponent[] baseComp : KITS.get(kitName).getItems(player.hasPermission("jawacommands.kit.admin"))){
+                player.spigot().sendMessage(baseComp);
+            }
+        } else {
+            kitDoesntExist(player);
+        }
+    }
+    
+    /** Makes the player Use the kit.Kit rules are followed.
+     * @param player
+     * @param kitName 
+     * @return  
+     */
+    public static boolean useKit(Player player, String kitName){
+        if (validateKit(kitName, player)) return KITS.get(kitName).useKit(player);
+        else return false;
+    }
+    
+    public static void giveKit(CommandSender commandSender, String kitName, List<Player> targets, List<String> overrides){
+        KITS.get(kitName).useKit(targets, overrides);
     }
 
 //    /**

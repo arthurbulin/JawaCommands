@@ -44,7 +44,6 @@ public class Spawn implements CommandExecutor{
             System.out.println("Only players can user this command!");
             return true;
         }
-        
         if ((args == null) || (args.length == 0)) {
             if (JawaCommands.worldSpawns.has(player.getWorld().getName())) {
                 JSONObject worldSpawns = JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName());
@@ -57,7 +56,7 @@ public class Spawn implements CommandExecutor{
                 }
             }
             player.teleport(player.getWorld().getSpawnLocation());
-            player.sendMessage(ChatColor.DARK_GREEN + " > Spawning you in " + player.getWorld().getName());
+            player.sendMessage(ChatColor.GREEN + " > Spawning you in " + player.getWorld().getName());
         } else if ((args.length > 0) && player.hasPermission("jawacommands.spawn." + args[0])){
             TPHandler.performSafeTeleport(player, Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
             //player.teleport(Bukkit.getServer().getWorld(args[0]).getSpawnLocation(),PlayerTeleportEvent.TeleportCause.COMMAND);

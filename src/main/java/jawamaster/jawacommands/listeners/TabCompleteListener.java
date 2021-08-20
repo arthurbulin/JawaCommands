@@ -20,11 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import jawamaster.jawacommands.commands.PlayerTime;
-import jawamaster.jawacommands.commands.PlayerWeather;
+import jawamaster.jawacommands.commands.playeraugmentation.PlayerTime;
+import jawamaster.jawacommands.commands.playeraugmentation.PlayerWeather;
 import jawamaster.jawacommands.commands.home.Home;
 import jawamaster.jawacommands.commands.warps.ModWarp;
 import jawamaster.jawacommands.handlers.WarpHandler;
+import jawamaster.jawacommands.kit.KitCommand;
 import net.jawasystems.jawacore.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -140,6 +141,13 @@ public class TabCompleteListener implements Listener {
         
         else if (event.getBuffer().matches("/walkspeed\\s.*")) {
             event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/walkspeed\\s"), new LinkedList(Arrays.asList("2","3","4","5","6","7","8","9","10")), new ArrayList()));
+        }
+        
+        else if (event.getBuffer().matches("/kit\\s.*")) {
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/kit\\s"), KitCommand.tabs, new ArrayList()));
+            if (event.getBuffer().matches("/kit\\s.*?\\s.*?")){
+                event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/kit\\s*\\s*\\s"), KitCommand.tabsTwo, new ArrayList()));
+            }
         }
 
 
