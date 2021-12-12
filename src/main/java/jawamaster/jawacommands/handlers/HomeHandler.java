@@ -17,9 +17,13 @@
 package jawamaster.jawacommands.handlers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
+import jawamaster.jawapermissions.handlers.PermissionsHandler;
 import net.jawasystems.jawacore.PlayerManager;
 import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.entity.Player;
@@ -36,6 +40,9 @@ import net.md_5.bungee.api.chat.hover.content.Text;
  * @author Jawamaster (Arthur Bulin)
  */
 public class HomeHandler {
+    
+    private static final Logger LOGGER = Logger.getLogger("HomeHandler");
+    
     public static final String HOMEPERMISSION = "jawacommands.home";
     public static final String ADDPERMISSION = HOMEPERMISSION + ".add";
     public static final String DELPERMISSION = HOMEPERMISSION + ".del";
@@ -46,6 +53,8 @@ public class HomeHandler {
     private static final String NODELPERMISSION = ChatColor.RED + "> You do not have permission to remove a home in this world.";
     private static final String NOHOMES = ChatColor.RED + "> You do not have any homes set. Run /home help to see how.";
     private static final String NOHOME = ChatColor.RED + "> {h} does not exist in your home list.";
+    
+    private static final HashMap<String, Integer> homeLimits = new HashMap();
 
     /** Adds a home entry to the user's "homes" index entry. If replace == true
      * an existing home will be overwritten. Otherwise the player will be warned
@@ -291,6 +300,19 @@ public class HomeHandler {
         } else {
             player.sendMessage(NOHOME.replace("{h}", homeName));
             return false;
+        }
+    }
+    
+    /** Sets the home limit for specific rank.
+     * @param rank The rank as a string
+     * @param limit The home count or -1 to treat it as infinite homes
+     */
+    public static void setHomeLimit(String rank, int limit){
+        if (PermissionsHandler.rankExists(rank)) {
+            homeLimits.put(rank, limit);
+            LOGGER.log(Level.INFO, "Home limit for {0} set to {1}", new Object[]{rank, limit});
+        } else {
+            LOGGER.log(Level.INFO, "Cannot set home limit for {0} as it is nor a valid rank", rank);
         }
     }
 }

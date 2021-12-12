@@ -1,6 +1,17 @@
-homes-prohibited-worlds:
-  - games
-  - we
+homes-settings:
+    homes-prohibited-worlds:
+        - games
+        - we
+    homes-enabled: true
+    homes-limits:
+        builder: 10
+        advbuilder: 20
+        superbuilder: 30
+        architect: -1
+        trainee: 40
+        admin: -1
+        superadmin: -1
+        owner: -1
 safe-tp-messages: true
 freeze-public-messages: true
 messages:

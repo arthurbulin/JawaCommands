@@ -17,6 +17,7 @@
 package jawamaster.jawacommands.handlers;
 
 import java.util.HashMap;
+import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.commands.playeraugmentation.FullBright;
 import jawamaster.jawacommands.commands.ChangeGameMode;
 import jawamaster.jawacommands.commands.Colors;
@@ -60,75 +61,72 @@ import org.json.JSONObject;
 public class CommandControlHandler {
 
     private static JavaPlugin plugin;
-    private static HashMap<String, CommandExecutor> commandMap;
-    public static HashMap<String, JSONObject> commandTabs;
+    private static final HashMap<String, CommandExecutor> COMMANDMAP = new HashMap();
+    public static final HashMap<String, JSONObject> COMMANDTABS = new HashMap();
 
     public CommandControlHandler(JavaPlugin plugin) {
         CommandControlHandler.plugin = plugin;
-        commandMap = new HashMap();
-        commandTabs = new HashMap();
-        commandMap.put("colors", new Colors());
-        commandMap.put("kit", new KitCommand());
-        commandMap.put("givekit", new GiveKit());
 
-        commandMap.put("home", new Home());
-//        commandMap.put("sethome", new setHome());
-//        commandMap.put("delhome", new delHome());
-//        commandMap.put("listhome", new listHomes());
-        commandMap.put("homeinfo", new HomeInfo());
+        COMMANDMAP.put("colors", new Colors());
+        
+        COMMANDMAP.put("kit", new KitCommand());
+        COMMANDMAP.put("givekit", new GiveKit());
 
-        commandMap.put("sudo", new SudoAs());
+        if (JawaCommands.homesEnabled()) {
+            COMMANDMAP.put("home", new Home());
+            COMMANDMAP.put("homeinfo", new HomeInfo());
+            COMMANDMAP.put("otherhome", new OtherHome());
+        }
+        
+        COMMANDMAP.put("sudo", new SudoAs());
 
-        commandMap.put("makewarp", new MakeWarp());
-        commandMap.put("warp", new WarpCommand());
-        commandMap.put("modwarp", new ModWarp());
-        commandMap.put("delwarp", new DelWarp());
-        commandMap.put("wlwarp", new WarpWhitelist());
-        commandMap.put("blwarp", new WarpBlackList());
+        if (JawaCommands.warpsEnabled()) {
+            COMMANDMAP.put("makewarp", new MakeWarp());
+            COMMANDMAP.put("warp", new WarpCommand());
+            COMMANDMAP.put("modwarp", new ModWarp());
+            COMMANDMAP.put("delwarp", new DelWarp());
+            COMMANDMAP.put("wlwarp", new WarpWhitelist());
+            COMMANDMAP.put("blwarp", new WarpBlackList());
+            COMMANDMAP.put("warpinfo", new WarpInfo());
+        }
+        
+        COMMANDMAP.put("gm", new ChangeGameMode());
 
-        commandMap.put("gm", new ChangeGameMode());
+        COMMANDMAP.put("spawn", new Spawn());
+        COMMANDMAP.put("setspawn", new SetSpawn());
+        COMMANDMAP.put("removespawn", new RemoveSpawn());
 
-        commandMap.put("spawn", new Spawn());
-        commandMap.put("setspawn", new SetSpawn());
-        commandMap.put("removespawn", new RemoveSpawn());
+        COMMANDMAP.put("comehere", new ComeHere());
+        COMMANDMAP.put("gothere", new GoThere());
+        COMMANDMAP.put("accept", new TPAccept());
 
-        commandMap.put("comehere", new ComeHere());
-        commandMap.put("gothere", new GoThere());
-        commandMap.put("accept", new TPAccept());
+        COMMANDMAP.put("fullbright", new FullBright());
 
-        commandMap.put("fullbright", new FullBright());
-
-        commandMap.put("yeetport", new YeetPort());
+        COMMANDMAP.put("yeetport", new YeetPort());
         
-        commandMap.put("back", new BackCommand());
+        COMMANDMAP.put("back", new BackCommand());
         
-        commandMap.put("tpr", new RandomTP());
+        COMMANDMAP.put("tpr", new RandomTP());
         
-        commandMap.put("freeze", new Freeze());
+        COMMANDMAP.put("freeze", new Freeze());
         
-        commandMap.put("pweather", new PlayerWeather());
-        commandMap.put("ptime", new PlayerTime());
+        COMMANDMAP.put("pweather", new PlayerWeather());
+        COMMANDMAP.put("ptime", new PlayerTime());
         
-        commandMap.put("sfly", new SurvivalFly());
-        commandMap.put("flyspeed", new FlySpeed());
-        commandMap.put("walkspeed", new WalkSpeed());
+        COMMANDMAP.put("sfly", new SurvivalFly());
+        COMMANDMAP.put("flyspeed", new FlySpeed());
+        COMMANDMAP.put("walkspeed", new WalkSpeed());
         
-        commandMap.put("warpinfo", new WarpInfo());
-        
-        commandMap.put("otherhome", new OtherHome());
-        
-        commandMap.put("repair", new RepairCommand());
+        COMMANDMAP.put("repair", new RepairCommand());
 
         registerCommands();
         buildTabCompletionTable();
     }
 
     private static void registerCommands() {
-        for (String command : commandMap.keySet()) {
-            registerCommand(command, commandMap.get(command));
-
+        for (String command : COMMANDMAP.keySet()) {
+            registerCommand(command, COMMANDMAP.get(command));
         }
-
     }
 
     private static boolean registerCommand(String command, CommandExecutor exec) {
