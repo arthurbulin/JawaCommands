@@ -247,7 +247,7 @@ public class KitCommand implements CommandExecutor {
         switch (page) {
             case 1:
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit <name> " + ChatColor.YELLOW + "- Get this kit.");
-                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit help " + ChatColor.YELLOW + "- This help message.");
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit help [page]" + ChatColor.YELLOW + "- This help message.");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit info <name> " + ChatColor.YELLOW + "- See a description of <name>.");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit items <name> " + ChatColor.YELLOW + "- See the items in <name>.");
                 break;
@@ -268,7 +268,7 @@ public class KitCommand implements CommandExecutor {
                 break;
             default:
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit <name> " + ChatColor.YELLOW + "- Get this kit.");
-                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit help " + ChatColor.YELLOW + "- This help message.");
+                commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit help [page]" + ChatColor.YELLOW + "- This help message.");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit info <name> " + ChatColor.YELLOW + "- See a description of <name>.");
                 commandSender.sendMessage(ChatColor.GREEN + " > " + ChatColor.BLUE + "/kit items <name> " + ChatColor.YELLOW + "- See the items in <name>.");
                 break;
