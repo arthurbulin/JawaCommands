@@ -31,6 +31,7 @@ import jawamaster.jawacommands.commands.playeraugmentation.SurvivalFly;
 import jawamaster.jawacommands.commands.TPAccept;
 import jawamaster.jawacommands.commands.playeraugmentation.WalkSpeed;
 import jawamaster.jawacommands.commands.admin.Freeze;
+import jawamaster.jawacommands.commands.admin.SafeTeleportBypass;
 import jawamaster.jawacommands.commands.admin.SudoAs;
 import jawamaster.jawacommands.commands.development.BackCommand;
 import jawamaster.jawacommands.kit.KitCommand;
@@ -118,6 +119,8 @@ public class CommandControlHandler {
         COMMANDMAP.put("walkspeed", new WalkSpeed());
         
         COMMANDMAP.put("repair", new RepairCommand());
+        
+        COMMANDMAP.put("bypasssafetp", new SafeTeleportBypass());
 
         registerCommands();
         buildTabCompletionTable();

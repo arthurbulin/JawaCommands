@@ -4,15 +4,15 @@ homes-settings:
         - we
     homes-enabled: true
     homes-limits:
-        builder: 10
-        advbuilder: 20
-        superbuilder: 30
-        architect: -1
-        trainee: 40
-        admin: -1
-        superadmin: -1
-        owner: -1
-safe-tp-messages: true
+        guest: 0
+        builder: 2
+        advbuilder: 4
+        superbuilder: 6
+        architect: 8
+teleport-settings:
+    safe-tp-enabled: true
+    safe-tp-delay: 5
+    safe-tp-messages: true
 freeze-public-messages: true
 messages:
   safe-tp-freeze: "&a> You are being frozen for teleport."
@@ -23,3 +23,8 @@ messages:
   home-add: "&a> {h} has been saved"
   home-del: "&a> {h} has been deleted"
   home-tp: "&a> Welcome home"
+index-customization:
+    warps: warps
+    homes: homes
+warp-settings:
+    warps-enabled: true
