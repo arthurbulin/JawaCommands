@@ -30,7 +30,7 @@ public class PlayerMovementListener implements Listener {
 
     @EventHandler
     public void onPlayerMovement(PlayerMoveEvent event) {
-        if (FreezeHandler.isFrozen(event.getPlayer()) || TPHandler.safeTP(event.getPlayer())) {
+        if (FreezeHandler.isFrozen(event.getPlayer()) || TPHandler.isSafeTeleport(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
