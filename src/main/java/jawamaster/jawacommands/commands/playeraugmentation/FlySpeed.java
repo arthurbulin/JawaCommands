@@ -17,10 +17,13 @@
 package jawamaster.jawacommands.commands.playeraugmentation;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  *
@@ -43,35 +46,50 @@ public class FlySpeed implements CommandExecutor {
         if (((Player)commandSender).getAllowFlight()) {
             if (args == null | args.length == 0) {
                 ((Player) commandSender).setFlySpeed(.1f);
+                ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                 commandSender.sendMessage(ChatColor.GREEN + "> Flight speed reset to normal.");
             } else if (args.length == 1) {
+                boolean adverseEffect = !(((Player) commandSender).getGameMode().equals(GameMode.CREATIVE) || ((Player) commandSender).getGameMode().equals(GameMode.SPECTATOR));
                 switch (args[0]) {
                     case "1":
                         ((Player) commandSender).setFlySpeed(.1f);
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed reset to normal.");
                         break;
                     case "2":
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         ((Player) commandSender).setFlySpeed(.2f);
+                        if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 2, false, false, false));
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed set to impulse speed.");
                         break;
                     case "3":
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         ((Player) commandSender).setFlySpeed(.3f);
+                        if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 5, false, false, false));
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed set to light speed.");
                         break;
                     case "4":
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         ((Player) commandSender).setFlySpeed(.4f);
+                        if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 7, false, false, false));
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed set to warp speed.");
                         break;
                     case "6":
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         ((Player) commandSender).setFlySpeed(.6f);
+                        if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 14, false, false, false));
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed set to ridiculous speed.");
                         break;
                     case "8":
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         ((Player) commandSender).setFlySpeed(.8f);
+                        if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 30, false, false, false));
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed set to ludicrus speed.");
                         break;
                     case "10":
+                        ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                         ((Player) commandSender).setFlySpeed(1f);
+                        if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 50, false, false, false));
                         commandSender.sendMessage(ChatColor.GREEN + "> Flight speed set to " 
                                 + ChatColor.AQUA + "p" 
                                 + ChatColor.BLUE + "l" 
