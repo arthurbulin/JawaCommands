@@ -17,6 +17,8 @@
 package jawamaster.jawacommands.commands.admin;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -29,7 +31,8 @@ import org.bukkit.entity.Player;
  * @author alexander
  */
 public class SudoAs implements CommandExecutor{
-
+    private static final Logger LOGGER = Logger.getLogger("SudoAs");
+    
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         String usage = "/sudo <player> <command>";
@@ -44,9 +47,10 @@ public class SudoAs implements CommandExecutor{
             commandSender.sendMessage(ChatColor.RED + " > " + args[0] + " is not online!");
             return true;
         } else {
-            System.out.println("[SUDO] " + ((Player) commandSender).getName() + " used sudo on " + target.getName() + " with command: " + String.join(Arrays.toString(args).replace(args[0], "")).trim());
-            commandSender.sendMessage(ChatColor.GREEN + " > " + args[0] + " is now executing command: " + ChatColor.WHITE + String.join(Arrays.toString(args).replace(args[0], "")).trim());
-            target.performCommand(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+            String newCommand = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+            LOGGER.log(Level.INFO, "[SUDO] {0} used sudo on {1} with command: {2}", new Object[]{((Player) commandSender).getName(), target.getName(), newCommand});
+            commandSender.sendMessage(ChatColor.GREEN + " > " + args[0] + " is now executing command: " + ChatColor.WHITE + newCommand);
+            target.performCommand(newCommand);
             return true;
         }
         

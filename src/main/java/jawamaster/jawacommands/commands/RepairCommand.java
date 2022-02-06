@@ -16,13 +16,16 @@
  */
 package jawamaster.jawacommands.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
 
 /**
  *
@@ -36,12 +39,18 @@ public class RepairCommand implements CommandExecutor {
         ItemMeta meta = ((Player) sender).getInventory().getItemInMainHand().getItemMeta();
         if (meta instanceof Damageable && item.getType().isItem() && !item.getType().isBlock()){
             Damageable gmmeta = (Damageable)((Player) sender).getInventory().getItemInMainHand().getItemMeta();
+            Repairable repairTest = (Repairable)((Player) sender).getInventory().getItemInMainHand().getItemMeta();
+            System.out.println(repairTest.getRepairCost());
+//            ItemMeta gmmeta = ((Player) sender).getInventory().getItemInMainHand().getItemMeta();
+            System.out.println(gmmeta);
+            System.out.println(Bukkit.getServer().getRecipesFor(((Player) sender).getInventory().getItemInMainHand()));
             gmmeta.setDamage(0);
-            item.getType().getMaxDurability();
+//            item.getType().getMaxDurability();
             //meta.
-            item.setItemMeta((ItemMeta) gmmeta);
+            System.out.println(gmmeta);
+//            item.setItemMeta((ItemMeta) gmmeta);
             
-            System.out.println(item.getData().getItemType());
+//            System.out.println(item.getData());
             sender.sendMessage("Repairing");
         } else
             sender.sendMessage("That item is not repairable");
