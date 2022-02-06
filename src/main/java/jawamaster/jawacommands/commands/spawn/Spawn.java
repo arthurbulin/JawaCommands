@@ -16,16 +16,16 @@
  */
 package jawamaster.jawacommands.commands.spawn;
 
-import jawamaster.jawacommands.JawaCommands;
-import jawamaster.jawacommands.handlers.TPHandler;
-import net.jawasystems.jawacore.handlers.LocationDataHandler;
+import java.util.logging.Logger;
+import jawamaster.jawacommands.handlers.WorldHandler;
+import net.jawasystems.jawacore.PlayerManager;
+import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.json.JSONObject;
 
 /**
  *
@@ -33,32 +33,47 @@ import org.json.JSONObject;
  */
 public class Spawn implements CommandExecutor{
 
+    private static final Logger LOGGER = Logger.getLogger("spawn");
+    private static final String USAGE = "/spawn [world name]";
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
-        String usage = "/spawn [world name]";
-        Player player;
-        //permissions jawa.command.spawn.<world name>
-        if (commandSender instanceof Player){
-            player = (Player) commandSender;
-        } else {
+        
+        if (!(commandSender instanceof Player)){
             System.out.println("Only players can user this command!");
             return true;
         }
+        
+        Player player = (Player) commandSender;
+        PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
+        
         if ((args == null) || (args.length == 0)) {
-            if (JawaCommands.worldSpawns.has(player.getWorld().getName())) {
-                JSONObject worldSpawns = JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName());
-                for (String perm : worldSpawns.keySet()) {
-                    if (player.hasPermission("jawacommands.spawn." + perm)) {
-                        TPHandler.performSafeTeleport(player, LocationDataHandler.unpackLocation(JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
-                        //player.teleport(LocationDataHandler.unpackLocation(JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
-                        break;
-                    }
-                }
+            
+            if (WorldHandler.groupHasGlobalSpawn(pdObject.getRank())) {
+                player.spawnAt(WorldHandler.getGlobalSpawn(pdObject.getRank()));
+            } else if (WorldHandler.worldHasGroupSpawn(player.getWorld().getName(), pdObject.getRank())){
+                player.spawnAt(WorldHandler.getWorldSpawn(player.getWorld().getName(), pdObject.getRank()));
+            } else {
+                player.spawnAt(player.getWorld().getSpawnLocation());
             }
-            player.teleport(player.getWorld().getSpawnLocation());
-            player.sendMessage(ChatColor.GREEN + " > Spawning you in " + player.getWorld().getName());
+            
+//            if (WorldHandler.worldSpawns.has(player.getWorld().getName())) {
+//                JSONObject worldSpawns = WorldHandler.worldSpawns.getJSONObject(player.getWorld().getName());
+//                for (String perm : worldSpawns.keySet()) {
+//                    if (player.hasPermission("jawacommands.spawn." + perm)) {
+//                        TPHandler.performSafeTeleport(player, LocationDataHandler.unpackLocation(WorldHandler.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
+//                        //player.teleport(LocationDataHandler.unpackLocation(JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
+//                        break;
+//                    }
+//                }
+//            }
+//            player.teleport(player.getWorld().getSpawnLocation());
         } else if ((args.length > 0) && player.hasPermission("jawacommands.spawn." + args[0])){
-            TPHandler.performSafeTeleport(player, Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
+            if (WorldHandler.worldHasGroupSpawn(args[0], pdObject.getRank())){
+                player.spawnAt(WorldHandler.getWorldSpawn(args[0], pdObject.getRank()));
+            } else if (Bukkit.getServer().getWorld(args[0]) != null) {
+                player.spawnAt(Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
+            }
+//            TPHandler.performSafeTeleport(player, Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
             //player.teleport(Bukkit.getServer().getWorld(args[0]).getSpawnLocation(),PlayerTeleportEvent.TeleportCause.COMMAND);
         } else {
             player.sendMessage(ChatColor.RED + " > You do not have permission to spawn in this world!");

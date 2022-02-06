@@ -26,6 +26,7 @@ import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawapermissions.handlers.PermissionsHandler;
 import net.jawasystems.jawacore.PlayerManager;
 import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
+import net.jawasystems.jawacore.utils.TimeParser;
 import org.bukkit.entity.Player;
 import org.json.JSONObject;
 import net.md_5.bungee.api.ChatColor;
@@ -56,6 +57,14 @@ public class HomeHandler {
     
     private static final HashMap<String, Integer> homeLimits = new HashMap();
 
+    /** Returns true if the player has any homes at all for this server
+     * @param player
+     * @return 
+     */
+    public static boolean hasHomes(Player player){
+        PlayerDataObject pdObject = PlayerManager.getPlayerDataObject(player);
+        return pdObject.containsHomeData();
+    }
     /** Adds a home entry to the user's "homes" index entry. If replace == true
      * an existing home will be overwritten. Otherwise the player will be warned
      * and the home will not be overwritten.
@@ -80,11 +89,16 @@ public class HomeHandler {
                 player.sendMessage(ChatColor.RED + "> Error: " + homeName +" already exists! Remove it first or replace it with 'replace'");
                 return false;
             } else {
-                pdObject.setHome(player, homeName);
-                //pdObject.setHome(homeName, LocationDataHandler.packLocation(player.getLocation()));
-                String homeMessage = JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-add", ChatColor.GREEN + "> {h} has been saved").replace("{h}", homeName);
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', homeMessage));
-                return true;
+                if (homeLimits.containsKey(pdObject.getRank()) && (pdObject.getHomeCount() >= homeLimits.get(pdObject.getRank()))){
+                    player.sendMessage(ChatColor.YELLOW + "> You have reached the home limit of " + homeLimits.get(pdObject.getRank()) + ". You must either replace a home or delete one.");
+                    return true;
+                } else {
+                    pdObject.setHome(player, homeName);
+                    //pdObject.setHome(homeName, LocationDataHandler.packLocation(player.getLocation()));
+                    String homeMessage = JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-add", ChatColor.GREEN + "> {h} has been saved").replace("{h}", homeName);
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', homeMessage));
+                    return true;
+                }
             }
         } else {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("home-no-addpermission", NOADDPERMISSION)));
@@ -215,6 +229,8 @@ public class HomeHandler {
                     .append(home.getString("world")).color(ChatColor.BLUE)
                     .append(" (X,Y,Z): ").color(ChatColor.GREEN)
                     .append((int) Math.round(home.getDouble("X")) + "," + (int) Math.round(home.getDouble("Y")) + "," + (int) Math.round(home.getDouble("Z"))).color(ChatColor.GOLD)
+                    .append(" Created: ").color(ChatColor.GREEN)
+                    .append(TimeParser.getHumanReadableDateTime(home.getString("date"),2)).color(ChatColor.DARK_AQUA)
                     .create();
             BaseComponent[] homeOptions = new ComponentBuilder(" > Home Options: ").color(ChatColor.GREEN)
                     .append(" [Delete]").color(ChatColor.DARK_RED)
@@ -305,14 +321,19 @@ public class HomeHandler {
     
     /** Sets the home limit for specific rank.
      * @param rank The rank as a string
-     * @param limit The home count or -1 to treat it as infinite homes
+     * @param limit The home count or anything less than 0 to remove the limit
      */
     public static void setHomeLimit(String rank, int limit){
         if (PermissionsHandler.rankExists(rank)) {
-            homeLimits.put(rank, limit);
-            LOGGER.log(Level.INFO, "Home limit for {0} set to {1}", new Object[]{rank, limit});
+            if (limit < 0){
+                homeLimits.remove(rank);
+                LOGGER.log(Level.INFO, "Home limits removed for {0}", rank);
+            } else {
+                homeLimits.put(rank, limit);
+                LOGGER.log(Level.INFO, "Home limit for {0} set to {1}", new Object[]{rank, limit});
+            }
         } else {
-            LOGGER.log(Level.INFO, "Cannot set home limit for {0} as it is nor a valid rank", rank);
+            LOGGER.log(Level.INFO, "Cannot set home limit for {0} as it is not a valid rank", rank);
         }
     }
 }
