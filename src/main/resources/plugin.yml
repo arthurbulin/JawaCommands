@@ -41,7 +41,7 @@ commands:
     description: Adds a player to the warps blacklist
   gm:
     description: Changes a player's game mode.
-    permission: gamemode.toggle
+    permission: jawacommands.gamemode.toggle
   spawn:
     description: Send a player to the corresponding world's spawn
     permission: jawacommands.spawn
@@ -59,7 +59,7 @@ commands:
     permission: jawacommands.accept
   fullbright:
     description: Gives you nightvision
-    permission: jawacommands.fullbright
+    permission: jawacommands.playeraugmentation.fullbright
   removespawn:
     description: Removes a custom spawn
     permission: jawacommands.spawn.remove
@@ -93,23 +93,23 @@ commands:
   pweather:
     description: "Allows a player to toggle their local player weather"
     usage: "/pweather [clear|rain|reset] [player]. Run without arguments to reset your own weather."
-    permission: "jawacommands.pweather"
+    permission: "jawacommands.playeraugmentation.pweather"
   ptime:
     description: "Allows a player to toggle their local player time"
     usage: "/ptime [morning|noon|sunset|night|midnight|sunrise|reset] [player]. Run without arguments to reset your own weather."
-    permission: "jawacommands.ptime"
+    permission: "jawacommands.playeraugmentation.ptime"
   sfly:
     description: "Allows a survival player to enable flight for themselves"
     usage: "/sfly"
-    permission: "jawacommands.sfly"
+    permission: "jawacommands.playeraugmentation.sfly"
   flyspeed:
     description: Sets a player's flying speed
     usage: "/flyspeed <[1|2|3|4|6|8|10]>"
-    permission: "jawacommands.flyspeed"
+    permission: "jawacommands.playeraugmentation.flyspeed"
   walkspeed:
     description: Sets a player's walk speed
     usage: "/walkspeed <[1|2|3|4|5|6|7|8|9|10]>"
-    permission: "jawacommands.walkspeed"
+    permission: "jawacommands.playeraugmentation.walkspeed"
   otherhome:
     description: View another player's home data
     usage: "/otherhome <player name> <[info|homename]> <[homename]>"
@@ -118,6 +118,10 @@ commands:
     description: Repair the item held in hand
     usage: "/repair"
     permission: "jawacommands.items.repair"
+  bypasssafetp:
+    description: Toggle safetp bypassing
+    usage: "/bypasssafetp"
+    permission: "jawacommands.teleport.bypass"
     
     
 permissions:
@@ -139,7 +143,7 @@ permissions:
   jawacommands.spawn.remove:
       description: Allows a user to remove a spawn
       default: false
-  jawacommands.fullbright:
+  jawacommands.playeraugmentation.fullbright:
       description: Allows a user to use fullbright
       default: true
   jawacommands.accept:
@@ -157,9 +161,12 @@ permissions:
   jawacommands.spawn:
       description: Allows a user to go to spawn
       default: true
-  gamemode.toggle:
+  jawacommands.gamemode.toggle:
       description: Allows a user to toggle between gamemodes
       default: true
+  jawacommands.gamemode.admin.other:
+      description: Allows an admin to change the gamemode of another player
+      default: op
   jawacommands.warps.blacklist:
       description: Allows an admin to add a black list to a warp
       default: op
@@ -205,25 +212,25 @@ permissions:
   jawacommands.freeze:
       description: Allows an admin to freeze or thaw a player with the freeze command
       default: op
-  jawacommands.pweather:
+  jawacommands.playeraugmentation.pweather:
       description: "Allows a user to change their local player weather"
       default: true
-  jawacommands.pweather.other: 
+  jawacommands.playeraugmentation.pweather.other: 
       description: "Allows an admin to control the weather of another user"
       default: op
-  jawacommands.ptime:
+  jawacommands.playeraugmentation.ptime:
       description: "Allows a user to change their local player time"
       default: true
-  jawacommands.ptime.other:
+  jawacommands.playeraugmentation.ptime.other:
       description: "Allows an admin to control the time of another user"
       default: op
-  jawacommands.sfly:
+  jawacommands.playeraugmentation.sfly:
       description: "Allows a player to enable flight for themselves"
       default: op
-  jawacommands.flyspeed:
+  jawacommands.playeraugmentation.flyspeed:
       description: "Allows a player to set their fly speed"
       default: op
-  jawacommands.walkspeed:
+  jawacommands.playeraugmentation.walkspeed:
       description: "Allows a player to set their walk speed"
       default: op
   jawacommands.home.other:
@@ -232,3 +239,6 @@ permissions:
   jawacommands.items.repair:
       description: "Allows a user to repair the item in hand"
       default: op
+  jawacommands.teleport.bypass:
+      description: "Allows a user to bypass the safe tp system"
+      default: true
