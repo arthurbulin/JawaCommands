@@ -17,6 +17,7 @@
 package jawamaster.jawacommands.commands.spawn;
 
 import java.util.logging.Logger;
+import jawamaster.jawacommands.handlers.TPHandler;
 import jawamaster.jawacommands.handlers.WorldHandler;
 import net.jawasystems.jawacore.PlayerManager;
 import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
@@ -49,29 +50,19 @@ public class Spawn implements CommandExecutor{
         if ((args == null) || (args.length == 0)) {
             
             if (WorldHandler.groupHasGlobalSpawn(pdObject.getRank())) {
-                player.spawnAt(WorldHandler.getGlobalSpawn(pdObject.getRank()));
+                TPHandler.performSafeTeleport(player, WorldHandler.getGlobalSpawn(pdObject.getRank()));
             } else if (WorldHandler.worldHasGroupSpawn(player.getWorld().getName(), pdObject.getRank())){
-                player.spawnAt(WorldHandler.getWorldSpawn(player.getWorld().getName(), pdObject.getRank()));
+                TPHandler.performSafeTeleport(player, WorldHandler.getWorldSpawn(player.getWorld().getName(), pdObject.getRank()));
             } else {
                 player.spawnAt(player.getWorld().getSpawnLocation());
             }
-            
-//            if (WorldHandler.worldSpawns.has(player.getWorld().getName())) {
-//                JSONObject worldSpawns = WorldHandler.worldSpawns.getJSONObject(player.getWorld().getName());
-//                for (String perm : worldSpawns.keySet()) {
-//                    if (player.hasPermission("jawacommands.spawn." + perm)) {
-//                        TPHandler.performSafeTeleport(player, LocationDataHandler.unpackLocation(WorldHandler.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
-//                        //player.teleport(LocationDataHandler.unpackLocation(JawaCommands.worldSpawns.getJSONObject(player.getWorld().getName()).getJSONObject(perm)));
-//                        break;
-//                    }
-//                }
-//            }
-//            player.teleport(player.getWorld().getSpawnLocation());
         } else if ((args.length > 0) && player.hasPermission("jawacommands.spawn." + args[0])){
-            if (WorldHandler.worldHasGroupSpawn(args[0], pdObject.getRank())){
-                player.spawnAt(WorldHandler.getWorldSpawn(args[0], pdObject.getRank()));
+            if (WorldHandler.groupHasGlobalSpawn(args[0])) {
+                TPHandler.performSafeTeleport(player, WorldHandler.getGlobalSpawn(args[0]));
+            } else if (WorldHandler.worldHasGroupSpawn(args[0], pdObject.getRank())){
+                TPHandler.performSafeTeleport(player, WorldHandler.getWorldSpawn(args[0], pdObject.getRank()));
             } else if (Bukkit.getServer().getWorld(args[0]) != null) {
-                player.spawnAt(Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
+                TPHandler.performSafeTeleport(player, Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
             }
 //            TPHandler.performSafeTeleport(player, Bukkit.getServer().getWorld(args[0]).getSpawnLocation());
             //player.teleport(Bukkit.getServer().getWorld(args[0]).getSpawnLocation(),PlayerTeleportEvent.TeleportCause.COMMAND);

@@ -90,7 +90,7 @@ public class BackHandler {
             topBack.setY(topBack.getWorld().getHighestBlockYAt(topBack) + 2);
         }
         
-        TPHandler.performSafeTeleport(target, topBack, PlayerTeleportEvent.TeleportCause.UNKNOWN);
+        TPHandler.performSafeTeleport(target, topBack.add(0, 1, 0), PlayerTeleportEvent.TeleportCause.UNKNOWN);
         BackHandler.removeUserBackLocation(target);
     }
     

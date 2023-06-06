@@ -43,9 +43,13 @@ public class FirstSpawnListener implements Listener {
         World world = event.getPlayer().getWorld();
         
 
-        if (JawaCommands.isDebug()){
+        if (true){
             LOGGER.log(Level.INFO, "groupHasGlobalSpawn:{0} worldHasGroupSpawn:{1} worldspawn:{2} isNewPlayer:{3} rank:{4} distance:{5}", 
-                    new Object[]{WorldHandler.groupHasGlobalSpawn(pdObject.getRank()), WorldHandler.worldHasGroupSpawn(world.getName(), pdObject.getRank()),event.getSpawnLocation().equals(world.getSpawnLocation()),player.hasPlayedBefore(),pdObject.getRank(),event.getSpawnLocation().distance(world.getSpawnLocation())< 12});
+                    new Object[]{WorldHandler.groupHasGlobalSpawn(pdObject.getRank()),
+                        WorldHandler.worldHasGroupSpawn(world.getName(), pdObject.getRank()),
+                        event.getSpawnLocation().equals(world.getSpawnLocation()),
+                        player.hasPlayedBefore(),pdObject.getRank(),
+                        event.getSpawnLocation().distance(world.getSpawnLocation())< 12});
                     LOGGER.log(Level.INFO, "default spawn location:{0} player spawn location:{1}", new Object[]{world.getSpawnLocation(), event.getSpawnLocation()});
 
         }
@@ -61,7 +65,7 @@ public class FirstSpawnListener implements Listener {
         //if (WorldHandler.worldSpawns.has(world.getName()) && WorldHandler.worldSpawns.getJSONObject(world.getName()).has(pdObject.getRank()) && event.getSpawnLocation().distance(world.getSpawnLocation()) < 25) {
         if (WorldHandler.groupHasGlobalSpawn(pdObject.getRank()) && event.getSpawnLocation().distance(world.getSpawnLocation()) < 12) {
             event.setSpawnLocation(WorldHandler.getGlobalSpawn(pdObject.getRank()));
-        } else if (WorldHandler.worldHasGroupSpawn(event.getSpawnLocation().getWorld().getName(), pdObject.getRank())) {
+        } else if (WorldHandler.worldHasGroupSpawn(event.getSpawnLocation().getWorld().getName(), pdObject.getRank()) && event.getSpawnLocation().distance(world.getSpawnLocation()) < 12) {
             event.setSpawnLocation(WorldHandler.getWorldSpawn(event.getSpawnLocation().getWorld().getName(), pdObject.getRank()));
         }
     }

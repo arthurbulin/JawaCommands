@@ -45,7 +45,7 @@ public class SpawnListener implements Listener {
 
         //"player, world, bed, customspawn"
         //System.out.println("onPlayerRespawnEvent." + event.getPlayer().getName() + ","+event.getPlayer().getWorld() + ","+ player.getBedSpawnLocation() + "," + JawaCommands.worldSpawns.has(world.getName()));
-        if (JawaCommands.isDebug()) {
+        if (true) {
             LOGGER.log(Level.INFO, "bed:{0} anchor:{1} worldspawn:{2} groupHasGlobal:{3} groupHasThisWorld:{4}",
                     new Object[]{event.isBedSpawn(), event.isAnchorSpawn(), event.getRespawnLocation().equals(world.getSpawnLocation()), WorldHandler.groupHasGlobalSpawn(pdObject.getRank()), WorldHandler.worldHasGroupSpawn(world.getName(), pdObject.getRank())});
         }

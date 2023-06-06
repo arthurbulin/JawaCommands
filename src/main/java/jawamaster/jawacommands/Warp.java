@@ -29,6 +29,7 @@ import org.bukkit.Location;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -366,6 +367,16 @@ public class Warp {
     public boolean sendPlayer(Player target, boolean override){
         if (override || playerCanVisit(target)){
             TPHandler.performSafeTeleport(target, location);
+            //target.teleport(location,PlayerTeleportEvent.TeleportCause.COMMAND);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean sendPlayerWithUnknownCause(Player target, boolean override){
+        if (override || playerCanVisit(target)){
+            TPHandler.performSafeTeleport(target, location, PlayerTeleportEvent.TeleportCause.UNKNOWN);
             //target.teleport(location,PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else {
