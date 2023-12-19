@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>jawamaster</groupId>
     <artifactId>JawaCommands</artifactId>
-    <version>1.18.X-1.0</version>
+    <version>1.20.X-0.1</version>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -39,13 +39,13 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.18.1-R0.1-SNAPSHOT</version>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>jawamaster</groupId>
             <artifactId>JawaPermissions</artifactId>
-            <version>1.18.X-1.0</version>
+            <version>1.20.X-0.1</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>net.jawasystems</groupId>
             <artifactId>JawaCore</artifactId>
-            <version>1.18.X-1.0</version>
+            <version>1.20.X-0.1</version>
         </dependency>
     </dependencies>
     <properties>
