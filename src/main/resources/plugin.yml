@@ -1,13 +1,13 @@
 name: JawaCommands
 main: jawamaster.jawacommands.JawaCommands
 description: "A command plugin to make minecraft a little more user friendly"
-version: 1.1
-api-version: 1.15
+version: 1.0
+api-version: 1.20
 depends: JawaPermissions, JawaCore
 commands:
   home:
     description: Used for home control.
-    usage: /home <-[d|sr|s|i|l|h]> <homename>
+    usage: '/home <[d|sr|s|i|l|h]> <homename>'
     permission: jawacommands.home
   homeinfo:
     description: Provides a user with specific home information
@@ -18,25 +18,30 @@ commands:
     permission: jawacommands.sudo
   warp:
     description: Warps a player to a specified warp.
-    permission: warps.warp
+    usage: '/warp <warp> [other|@p|@a] [override]'
+    permission: jawacommands.warps.warp
   makewarp:
     description: 'Creates a warp.'
-    permission: warps.admin.create
+    permission: jawacommands.warps.create
   modwarp:
     description: Modifies a warp.
-    permission: warps.admin.mod
+    usage: '/modwarp <warpname> [whitelist|location|hidden|owner|type] <[owner|type]>'
+    permission: jawacommands.warps.modify
+  warpinfo:
+    description: Displayer relevent warp information.
+    usage: '/warpinfo <warpname>'
+    permission: jawacommands.warps.info
   delwarp:
     description: Deletes a warp.
-    permission: warps.admin.delete
+    permission: jawacommands.warps.delete
   wlwarp:
-    description: Adds a user or users to the whitelist, removes them in the same process.
-    permission: warps.admin.wl
+    usage: '/wlwarp <warp name> <add|remove> <player name|selector>'
+    description: Add/remove a user or users to the whitelist
   blwarp:
     description: Adds a player to the warps blacklist
-    permission: warps.admin.bl
   gm:
     description: Changes a player's game mode.
-    permission: gamemode.toggle
+    permission: jawacommands.gamemode.toggle
   spawn:
     description: Send a player to the corresponding world's spawn
     permission: jawacommands.spawn
@@ -54,14 +59,18 @@ commands:
     permission: jawacommands.accept
   fullbright:
     description: Gives you nightvision
-    permission: jawacommands.fullbright
+    permission: jawacommands.playeraugmentation.fullbright
   removespawn:
     description: Removes a custom spawn
     permission: jawacommands.spawn.remove
   kit:
     description: 'Used to create, modify, and give kits'
     permission: jawacommands.kit.user
-    usage: '/kit -h for full instructions'
+    usage: 'Run /kit for full instructions'
+  givekit:
+    description: 'Used to give a kit to a player by staff, commandblock, or console'
+    permission: jawacommands.kit.other
+    usage: 'Run /givekit for full instructions'
   yeetport:
     description: 'Yeets a player into the air before teleporting to a warp'
     permission: jawacommands.yeetport
@@ -84,11 +93,36 @@ commands:
   pweather:
     description: "Allows a player to toggle their local player weather"
     usage: "/pweather [clear|rain|reset] [player]. Run without arguments to reset your own weather."
-    permission: "jawacommands.pweather"
+    permission: "jawacommands.playeraugmentation.pweather"
   ptime:
     description: "Allows a player to toggle their local player time"
     usage: "/ptime [morning|noon|sunset|night|midnight|sunrise|reset] [player]. Run without arguments to reset your own weather."
-    permission: "jawacommands.ptime"
+    permission: "jawacommands.playeraugmentation.ptime"
+  sfly:
+    description: "Allows a survival player to enable flight for themselves"
+    usage: "/sfly"
+    permission: "jawacommands.playeraugmentation.sfly"
+  flyspeed:
+    description: Sets a player's flying speed
+    usage: "/flyspeed <[1|2|3|4|6|8|10]>"
+    permission: "jawacommands.playeraugmentation.flyspeed"
+  walkspeed:
+    description: Sets a player's walk speed
+    usage: "/walkspeed <[1|2|3|4|5|6|7|8|9|10]>"
+    permission: "jawacommands.playeraugmentation.walkspeed"
+  otherhome:
+    description: View another player's home data
+    usage: "/otherhome <player name> <[info|homename]> <[homename]>"
+    permission: "jawacommands.home.other"
+  repair:
+    description: Repair the item held in hand
+    usage: "/repair"
+    permission: "jawacommands.items.repair"
+  bypasssafetp:
+    description: Toggle safetp bypassing
+    usage: "/bypasssafetp"
+    permission: "jawacommands.teleport.bypass"
+    
     
 permissions:
   jawacommands.back:
@@ -100,10 +134,16 @@ permissions:
   jawacommands.kit.user:
       description: Allows a user to use the kit command
       default: false
+  jawacommands.kit.admin:
+      description: Allows admin access to the kit command
+      default: op
+  jawacommands.kit.other:
+      description: Allows admin access to the givekit command
+      default: op
   jawacommands.spawn.remove:
       description: Allows a user to remove a spawn
       default: false
-  jawacommands.fullbright:
+  jawacommands.playeraugmentation.fullbright:
       description: Allows a user to use fullbright
       default: true
   jawacommands.accept:
@@ -121,26 +161,32 @@ permissions:
   jawacommands.spawn:
       description: Allows a user to go to spawn
       default: true
-  gamemode.toggle:
+  jawacommands.gamemode.toggle:
       description: Allows a user to toggle between gamemodes
       default: true
-  warps.admin.bl:
+  jawacommands.gamemode.admin.other:
+      description: Allows an admin to change the gamemode of another player
+      default: op
+  jawacommands.warps.blacklist:
       description: Allows an admin to add a black list to a warp
       default: op
-  warps.admin.wl:
+  jawacommands.warps.whitelist:
       description: Allows an admin to add a white list to a warp
       default: op
-  warps.admin.delete:
+  jawacommands.warps.delete:
       description: Allows an admin to delete a warp
       default: op
-  warps.admin.mod:
+  jawacommands.warps.modify:
       description: Allows an admin to add modify a warp
       default: op
-  warps.admin.create:
+  jawacommands.warps.create:
       description: Allows an admin to create a warp
       default: op
-  warps.warp:
+  jawacommands.warps.warp:
       description: Allows a player to list warps they can see and visit them
+      default: true
+  jawacommands.warps.info:
+      description: Allows a player to see information regarding a warp
       default: true
   jawacommands.sudo:
       description: Allows an admin to force a player to run a command
@@ -166,15 +212,33 @@ permissions:
   jawacommands.freeze:
       description: Allows an admin to freeze or thaw a player with the freeze command
       default: op
-  jawacommands.pweather:
+  jawacommands.playeraugmentation.pweather:
       description: "Allows a user to change their local player weather"
       default: true
-  jawacommands.pweather.other: 
+  jawacommands.playeraugmentation.pweather.other: 
       description: "Allows an admin to control the weather of another user"
       default: op
-  jawacommands.ptime:
+  jawacommands.playeraugmentation.ptime:
       description: "Allows a user to change their local player time"
       default: true
-  jawacommands.ptime.other:
+  jawacommands.playeraugmentation.ptime.other:
       description: "Allows an admin to control the time of another user"
       default: op
+  jawacommands.playeraugmentation.sfly:
+      description: "Allows a player to enable flight for themselves"
+      default: op
+  jawacommands.playeraugmentation.flyspeed:
+      description: "Allows a player to set their fly speed"
+      default: op
+  jawacommands.playeraugmentation.walkspeed:
+      description: "Allows a player to set their walk speed"
+      default: op
+  jawacommands.home.other:
+      description: "Allows staff to view/tp to another player's homes"
+      default: op
+  jawacommands.items.repair:
+      description: "Allows a user to repair the item in hand"
+      default: op
+  jawacommands.teleport.bypass:
+      description: "Allows a user to bypass the safe tp system"
+      default: true

@@ -54,7 +54,7 @@ public class ChangeGameMode implements CommandExecutor {
             target = ((Player) commandSender);
             toGM = args[0].toLowerCase();
         } else if (args.length == 2){ //Assumes 1 argument is for player self target, else change the gm targer to the name of the player
-            if (!commandSender.hasPermission("gamemode.admin.other")){
+            if (!commandSender.hasPermission("jawacommands.gamemode.admin.other")){
                 commandSender.sendMessage(ChatColor.RED + " > You do not have permission to change other people's gamemode.");
                 return true;
             }
@@ -88,7 +88,7 @@ public class ChangeGameMode implements CommandExecutor {
         
         //if (WorldHandler.isAllowedInWorld(target.getWorld(), "gamemode", toMode.toString().toLowerCase()) || target.hasPermission("gamemode.admin.override")){
         //System.out.println("gamemode." + toMode.toString().toLowerCase());
-        if (target.hasPermission("gamemode." + toMode.toString().toLowerCase()) || commandSender.hasPermission("gamemode.admin.override")) {
+        if (target.hasPermission("jawacommands.gamemode." + toMode.toString().toLowerCase()) || commandSender.hasPermission("jawacommands.gamemode.admin.override")) {
             target.setGameMode(toMode);
 
             //inform target and commandsender

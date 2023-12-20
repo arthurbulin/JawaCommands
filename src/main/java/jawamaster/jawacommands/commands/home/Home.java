@@ -30,27 +30,29 @@ public class Home implements CommandExecutor{
     public boolean onCommand(CommandSender commandSender, Command arg1, String arg2, String[] args) {
         Player player = (Player) commandSender;
         String[] usage = {
-            ChatColor.GREEN + " > " + ChatColor.WHITE +  "/home <[d|sr|s|i|l|h]> <homename>",
+            ChatColor.GREEN + "> /home command help",
+            ChatColor.GREEN + " > " + ChatColor.WHITE +  "/home <[set|replace|info|list|delete|help]> <homename>",
             ChatColor.GREEN + " > " + ChatColor.WHITE + "Running this command without arguments will teleport you to your default home (named \"home\")",
             ChatColor.GREEN + " > " + ChatColor.WHITE + "Running /home bed will teleport you to your bed. You " + ChatColor.RED + "CANNOT" + ChatColor.WHITE + " set 'bed' as a home except by sleeping in a bed!",
             ChatColor.GREEN + " > " + ChatColor.WHITE + "Running /home <homename> will send you right to that home.",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "delete (d) removes the specified home",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "set (s) creates a new specified home",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "replace (r) creates a new home by replacing an existing",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "info (i) gives information about a specific home",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "list (l) lists the available homes",
-            ChatColor.GREEN + " > " + ChatColor.WHITE + "help (h) prints this help"};
+            ChatColor.GREEN + " > delete - " + ChatColor.WHITE + "removes the specified home",
+            ChatColor.GREEN + " > set - " + ChatColor.WHITE + "creates a new specified home",
+            ChatColor.GREEN + " > replace - " + ChatColor.WHITE + "creates a new home by replacing an existing",
+            ChatColor.GREEN + " > info - " + ChatColor.WHITE + "gives information about a specific home",
+            ChatColor.GREEN + " > list - " + ChatColor.WHITE + "lists the available homes",
+            ChatColor.GREEN + " > help - " + ChatColor.WHITE + "prints this help"};
         if ((args == null) || (args.length == 0)){
             boolean worked = HomeHandler.sendToHome(player, "home");
-            if (!worked) player.sendMessage(ChatColor.RED + "> Error: That home doesn't exist. Run /home help for help.");
+            if (!worked) player.sendMessage(ChatColor.RED + "> Error: You don't have a default home. Run /home help for help.");
+            else if (!HomeHandler.hasHomes(player)) player.sendMessage(usage);
         } else {
             int action = 0;
-            if (args[0].equalsIgnoreCase("delete") || args[0].equals("d")) action = 1;
-            else if (args[0].equalsIgnoreCase("set") || args[0].equals("s")) action = 2;
-            else if (args[0].equalsIgnoreCase("replace") || args[0].equals("r")) action = 3;
-            else if (args[0].equalsIgnoreCase("info") || args[0].equals("i")) action = 4;
-            else if (args[0].equalsIgnoreCase("list") || args[0].equals("l")) action = 5;
-            else if (args[0].equalsIgnoreCase("help") || args[0].equals("h")) action = 6;
+            if (args[0].equalsIgnoreCase("delete")) action = 1;
+            else if (args[0].equalsIgnoreCase("set")) action = 2;
+            else if (args[0].equalsIgnoreCase("replace")) action = 3;
+            else if (args[0].equalsIgnoreCase("info")) action = 4;
+            else if (args[0].equalsIgnoreCase("list")) action = 5;
+            else if (args[0].equalsIgnoreCase("help")) action = 6;
 
             switch (action) {
                 case 0:

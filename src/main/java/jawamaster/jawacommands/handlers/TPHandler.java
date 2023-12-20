@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import jawamaster.jawacommands.JawaCommands;
+import net.jawasystems.jawacore.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -36,25 +37,37 @@ import org.bukkit.util.Vector;
  */
 public class TPHandler {
 
-    static Map<String, String> currentTPRequest = new HashMap<String, String>();
-    static Map<String, String> currentSummonRequest = new HashMap<String, String>();
-    static HashMap<UUID, Integer> playerTPTask = new HashMap();
-    private static HashSet<Player> safeTeleport = new HashSet();
+    private static final Map<String, String> CURRENTTPREQUEST = new HashMap();
+    private static final Map<String, String> CURRENTSUMMONREQUEST = new HashMap();
+//    private static final HashMap<UUID, Integer> playerTPTask = new HashMap();
+    private static final HashSet<Player> SAFETELEPORT = new HashSet();
+    private static final HashSet<Player> SAFETELEPORTBYPASS = new HashSet();
     public static long keepAlive = 1200;
     public static long coolDown = 1200;
+    private static boolean safeTeleportEnabled = false;
+    
+    /** enable safe teleport
+     */
+    public static void enableSafeTeleport(){
+        safeTeleportEnabled = true;
+    }
+    
+    public static void disableSafeTeleport(){
+        safeTeleportEnabled = false;
+    }
 
     //Person the request is being sent to is the target
     public static void tpRequest(int type, Player player, Player target) {
         String playerName = ChatColor.translateAlternateColorCodes('&', player.getDisplayName());
         String targetName = ChatColor.translateAlternateColorCodes('&', target.getDisplayName());
-        player.sendMessage(ChatColor.DARK_GREEN + " > Sending request to " + targetName);
+        player.sendMessage(ChatColor.GREEN + " > Sending request to " + targetName);
 
         if (type == 0) { //To tpa to a player
-            target.sendMessage(ChatColor.GREEN + " > " + playerName + " has requested to teleport to you.");
-            currentTPRequest.put(target.getName(), player.getName());
+            target.sendMessage(ChatColor.GREEN + "> " + playerName + ChatColor.RESET + ChatColor.GREEN + " has requested to teleport to you.");
+            CURRENTTPREQUEST.put(target.getName(), player.getName());
         } else if (type == 1) { //to summona a player to you
-            target.sendMessage(ChatColor.GREEN + " > " + playerName + " has requested YOU teleport to them.");
-            currentSummonRequest.put(target.getName(), player.getName());
+            target.sendMessage(ChatColor.GREEN + "> " + playerName + ChatColor.RESET + ChatColor.GREEN + " has requested YOU teleport to them.");
+            CURRENTSUMMONREQUEST.put(target.getName(), player.getName());
         }
 
         target.sendMessage(ChatColor.GREEN + " > Type /accept to accept the request.");
@@ -62,31 +75,31 @@ public class TPHandler {
     }
 
     public static void killRequest(Player target) {
-        if (currentTPRequest.containsKey(target.getName())) {
-            Player player = Bukkit.getServer().getPlayer(currentTPRequest.get(target.getName()));
-            player.sendMessage(ChatColor.RED + " > Your teleport request timed out.");
-            currentTPRequest.remove(target.getName());
-        } else if (currentSummonRequest.containsKey(target.getName())) {
-            Player player = Bukkit.getServer().getPlayer(currentSummonRequest.get(target.getName()));
-            player.sendMessage(ChatColor.RED + " > Your summon request timed out.");
-            currentSummonRequest.remove(target.getName());
+        if (CURRENTTPREQUEST.containsKey(target.getName())) {
+            Player player = Bukkit.getServer().getPlayer(CURRENTTPREQUEST.get(target.getName()));
+            player.sendMessage(ChatColor.RED + "> Your teleport request timed out.");
+            CURRENTTPREQUEST.remove(target.getName());
+        } else if (CURRENTSUMMONREQUEST.containsKey(target.getName())) {
+            Player player = Bukkit.getServer().getPlayer(CURRENTSUMMONREQUEST.get(target.getName()));
+            player.sendMessage(ChatColor.RED + "> Your summon request timed out.");
+            CURRENTSUMMONREQUEST.remove(target.getName());
         }
 
     }
 
     public static boolean tpAccept(Player player) {
-        if (currentTPRequest.containsKey(player.getName())) {
-            Player target = Bukkit.getServer().getPlayer(currentTPRequest.get(player.getName()));
-            currentTPRequest.remove(player.getName());
-            player.sendMessage(ChatColor.DARK_GREEN + " > Teleporting " + target.getDisplayName() + " to you.");
-            target.sendMessage(ChatColor.DARK_GREEN + " > Teleporting you to " + player.getDisplayName());
+        if (CURRENTTPREQUEST.containsKey(player.getName())) {
+            Player target = Bukkit.getServer().getPlayer(CURRENTTPREQUEST.get(player.getName()));
+            CURRENTTPREQUEST.remove(player.getName());
+            player.sendMessage(ChatColor.GREEN + "> Teleporting " + target.getDisplayName() + ChatColor.RESET + ChatColor.GREEN + " to you.");
+            target.sendMessage(ChatColor.GREEN + "> Teleporting you to " + player.getDisplayName());
             target.teleport(player, PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
-        } else if (currentSummonRequest.containsKey(player.getName())) {
-            Player target = Bukkit.getServer().getPlayer(currentSummonRequest.get(player.getName()));
-            currentSummonRequest.remove(player.getName());
-            player.sendMessage(ChatColor.DARK_GREEN + " > Teleporting you to " + target.getDisplayName());
-            target.sendMessage(ChatColor.DARK_GREEN + " > Teleporting " + player.getDisplayName() + " to you.");
+        } else if (CURRENTSUMMONREQUEST.containsKey(player.getName())) {
+            Player target = Bukkit.getServer().getPlayer(CURRENTSUMMONREQUEST.get(player.getName()));
+            CURRENTSUMMONREQUEST.remove(player.getName());
+            player.sendMessage(ChatColor.GREEN + "> Teleporting you to " + target.getDisplayName());
+            target.sendMessage(ChatColor.GREEN + "> Teleporting " + player.getDisplayName() + ChatColor.RESET + ChatColor.GREEN + " to you.");
             player.teleport(target, PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         }
@@ -156,31 +169,31 @@ public class TPHandler {
      * @param cause 
      */
     public static void performSafeTeleport(Player target, Location loc, PlayerTeleportEvent.TeleportCause cause) {
-        
-        //Inform the target of freezing
-        if (JawaCommands.getConfiguration().getBoolean("safe-tp-messages", true)) {
-            target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-freeze", "&e> You are being frozen for teleport.")));
-            //target.sendMessage(ChatColor.GREEN + "> You are being frozen for teleport.");
-        }
+        boolean safeTP = target.hasPermission("jawacommands.teleport.bypass");
+        if (PlayerManager.getPlayerDataObject(target).safeTeleportEnabled()) {
+            //Inform the target of freezing
+            if (JawaCommands.getConfiguration().getBoolean("teleport-settings.safe-tp-messages", true)) {
+                target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-freeze", "&e> You are being frozen for teleport.")));
+            }
+            target.setInvulnerable(true);
+            //Freeze them
+            SAFETELEPORT.add(target);
 
+            Bukkit.getServer().getScheduler().runTaskLater(JawaCommands.getPlugin(), () -> {
+                //Unfreeze the player
+                SAFETELEPORT.remove(target);
+                if (JawaCommands.getConfiguration().getBoolean("teleport-settings.safe-tp-messages", true)) {
+                    target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-thaw", "&e> You have been thawed.")));
+                }
+                target.setInvulnerable(false);
+
+            }, JawaCommands.getConfiguration().getInt("teleport-settings.safe-tp-delay", 5));
+        }
+        
         //Teleport the player
         target.teleport(loc, cause);
-        
         //Cancel all velocity if need be
         target.setVelocity(new Vector(0, 0, 0));
-        
-        //Freeze them
-        safeTeleport.add(target);
-
-        Bukkit.getServer().getScheduler().runTaskLater(JawaCommands.getPlugin(), () -> {
-            //Unfreeze the player
-            safeTeleport.remove(target);
-            if (JawaCommands.getConfiguration().getBoolean("safe-tp-messages", true)) {
-                target.sendMessage(ChatColor.translateAlternateColorCodes('&', JawaCommands.getConfiguration().getConfigurationSection("messages").getString("safe-tp-thaw", "&e> You have been thawed.")));
-                //target.sendMessage(ChatColor.GREEN + "> You have been thawed.");
-            }
-            
-        }, 100);
     }
     
     /** Performs a teleport that tries to keep the player from falling through the ground
@@ -195,8 +208,22 @@ public class TPHandler {
         
     }
     
-    public static boolean safeTP(Player player){
-        return safeTeleport.contains(player);
+    public static boolean isSafeTeleport(Player player){
+        return SAFETELEPORT.contains(player);
+    }
+    
+    /** Return the number of entries in the bypass set.
+     * @return 
+     */
+    public static int sizeOfTeleportBypass(){
+        return SAFETELEPORTBYPASS.size();
+    }
+    
+    /** return if safe teleport is enabled
+     * @return 
+     */
+    public static boolean isSafeTeleportEnabled(){
+        return safeTeleportEnabled;
     }
 
 }

@@ -18,139 +18,212 @@ package jawamaster.jawacommands.handlers;
 
 import net.jawasystems.jawacore.handlers.JSONHandler;
 import java.io.File;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jawamaster.jawacommands.JawaCommands;
-import org.bukkit.World;
-import org.json.JSONArray;
+import net.jawasystems.jawacore.handlers.LocationDataHandler;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.json.JSONObject;
 
-/**
+/** Controls world features such as world spawn.
  *
  * @author alexander
  */
 
-//TODO this whole thing is a mess
 public class WorldHandler {
-    
-    /** Checks the /plugin/worlds.json file to see if certain actions are allowed or not
-     * world is the world you are checking. Section is the action subsection. Item is what
-     * you are checking for. 
-     * @param world
-     * @param section
-     * @param item
-     * @return 
-     */
-    public static boolean isAllowedInWorld(World world, String section, String item){
-        // FIXME Build resolution to deal with worlds not already configured
-        JSONObject worldConfiguration = JawaCommands.getWorldConfiguration().getJSONObject(world.getName());
-        boolean isStrict = worldConfiguration.getBoolean("strict");
-        if (worldConfiguration.keySet().contains(section)) {
-            JSONObject worldSection = worldConfiguration.getJSONObject(section);
 
-            JSONArray allowed;
-            JSONArray denied;
-            if (worldSection.keySet().contains("allowed")) allowed = worldSection.getJSONArray("allowed");
-            else allowed = new JSONArray();
-            if (worldSection.keySet().contains("allowed")) denied = worldSection.getJSONArray("denied");
-            else denied = new JSONArray();
-
-
-            if (allowed.toList().contains(item)) return true; //If explicitly allowed True
-            else if (denied.toList().contains(item)) return false; //If explicitly not allowed False
-            else return !isStrict; //If not defined and world is strict False
-            //If behavior is not defined, and world is not strict be generally permissive True
-        } else { //If section has not been defined
-            return !isStrict;
-        }
-        
-    }
+    private static final Logger LOGGER = Logger.getLogger("WorldHandler");
     
-    public static boolean isAllowedInWorld(World world, String section){
-        JSONObject worldConfiguration = JawaCommands.getWorldConfiguration().getJSONObject(world.getName());
-        boolean isStrict = worldConfiguration.getBoolean("strict");
-        
-        if (worldConfiguration.keySet().contains(section)) {
-            
-            if (worldConfiguration.keySet().contains(section)) return worldConfiguration.getBoolean(section);
-            else return !isStrict; //If not defined and world is strict False
-            //If behavior is not defined, and world is not strict be generally permissive True
-            
-        } else { //If section has not been defined
-            return !isStrict;
-        }
-    }
-    
-    /** Returns if a world is configured or not.
-     * @param world
-     * @return 
+    private static final HashMap<String, Location> GLOBALSPAWNS = new HashMap();
+    private static final HashMap<String, HashMap<String,Location>> WORLDSPAWNS = new HashMap();
+   
+    /** *  Loads custom spawn points for the worlds and stores them in local hashmaps.
+     * If the worldspawns.txt doesn't exist or is empty it will do nothing. 
      */
-    public static boolean worldIsConfigured(World world){
-        JSONObject worldConfiguration = JawaCommands.getWorldConfiguration().getJSONObject(world.getName());
-        return worldConfiguration.getBoolean("configured");
-    }
-    
-    /** Returns true or false depending on if a world is strict.
-     * @param world
-     * @return 
-     */
-    public static boolean worldIsStrict(World world){
-        JSONObject worldConfiguration = JawaCommands.getWorldConfiguration().getJSONObject(world.getName());
-        return worldConfiguration.getBoolean("strict");
-    }
-    
-    public static JSONObject generateWorldConfigs(){
-        JSONObject worldsConfig = new JSONObject();
-        JSONObject worldConfig = new JSONObject();
-        worldConfig.put("strict", false);
-        worldConfig.put("configured", false);
-        worldConfig.put("back count", 10);
-        worldConfig.put("back-allowed", false);
-        JawaCommands.getPlugin().getServer().getWorlds().forEach((world) -> {
-            worldsConfig.put(world.getName(), worldConfig);
-        });
-        return worldsConfig;
-    }
-    
-    public static JSONObject LoadWorldConfigs(){
-        JSONObject worldConfigs = JSONHandler.LoadJSONConfig(JawaCommands.getPlugin(), "/worlds.json");
-        if (worldConfigs == null){
-            worldConfigs = generateWorldConfigs();
-            JSONHandler.WriteJSONToFile(JawaCommands.getPlugin(),"/worlds.json", worldConfigs);
-        }
-        
-        System.out.println("[JawaCommands][WorldHandler] " + worldConfigs.length() + " worlds have been configured and loaded for configuration management");
-        return worldConfigs;
-        
-    }
-    
-    public static int getConfigNumber(World world, String section){
-        JSONObject worldConfiguration = JawaCommands.getWorldConfiguration().getJSONObject(world.getName());
-        if (worldConfiguration.keySet().contains(world.getName()) && worldConfiguration.getJSONObject(world.getName()).keySet().contains(section)){
-            return worldConfiguration.getJSONObject(world.getName()).getInt(section);
-        } else return -1;
-    }
-    
-    /** Loads custom spawn points for the worlds and returns them as a HashMap<String,JSONObject>.
-     * If the worldspawns.txt doesn't exist or is empty it will return an empty map.
-     * @return 
-     */
-    public static JSONObject loadWorldSpawns(){
-        JSONObject spawnJSON = new JSONObject();
+    public static void loadWorldSpawns(){
         File worldspawns = new File(JawaCommands.getPlugin().getDataFolder() + "/worldspawns.json");
 
         if (worldspawns.exists()){ //Load the jsonobject
-            spawnJSON = JSONHandler.LoadJSONConfig(JawaCommands.getPlugin(),"/worldspawns.json");
+            JSONObject spawnJSON = JSONHandler.LoadJSONConfig(JawaCommands.getPlugin(), "/worldspawns.json");
             if (spawnJSON == null) { //verify that the JSONHandler could load the data in the file.
-                Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "Unable to load custom spawn points even though a file exists, it may just be empty.");
-                return spawnJSON;
+                LOGGER.log(Level.INFO, "Unable to load custom spawn points even though a file exists, it may just be empty.");
+            } else {
+                LOGGER.log(Level.INFO, "Loading custom spawn points.");
+                for (String key : spawnJSON.keySet()) {
+                    if (key.equals("GLOBAL")) { //key is global
+                        for (String group : spawnJSON.getJSONObject(key).keySet()){
+                            JSONObject tmpJSON = spawnJSON.getJSONObject(key).getJSONObject(group);
+                            GLOBALSPAWNS.put(group, new Location(Bukkit.getWorld(tmpJSON.getString("world")), tmpJSON.getDouble("X"), tmpJSON.getDouble("Y"), tmpJSON.getDouble("Z"), 0, 0));
+                        }
+                    } else { //Key is world
+                        HashMap<String,Location> loadedWorldSpawns = new HashMap();
+                        for (String group : spawnJSON.getJSONObject(key).keySet()) {
+                            JSONObject tmpJSON = spawnJSON.getJSONObject(key).getJSONObject(group);
+                            loadedWorldSpawns.put(group, new Location(Bukkit.getWorld(tmpJSON.getString("world")), tmpJSON.getDouble("X"), tmpJSON.getDouble("Y"), tmpJSON.getDouble("Z"), 0, 0));
+                        }
+                        WORLDSPAWNS.put(key, loadedWorldSpawns);
+                        LOGGER.log(Level.INFO, "{0} world spawns loaded for {1}", new Object[]{WORLDSPAWNS.size(), key});
+                    }
+                }
+                LOGGER.log(Level.INFO, "{0} global spawns loaded", GLOBALSPAWNS.size());
+                LOGGER.log(Level.INFO, "{0} total worlds have world spawns", WORLDSPAWNS.size());
             }
-            Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "Loading custom spawn points.");
-            return spawnJSON;
             
         } else { //No file exists, this is ok
-            Logger.getLogger(JSONHandler.class.getName()).log(Level.INFO, "No custom spawn points exist.");
-            return spawnJSON;
+            LOGGER.log(Level.INFO, "No custom spawn points exist.");
         }
+    }
+    
+    /** Add a group spawn to a world.
+     * @param group The group/rank that will spawn here
+     * @param spawn The location of the spawn
+     */
+    public static void addWorldSpawn(String group, Location spawn){
+        if (WORLDSPAWNS.containsKey(spawn.getWorld().getName())) {
+            WORLDSPAWNS.get(spawn.getWorld().getName()).put(group, spawn) ;
+        } else {
+            HashMap<String,Location> tmp = new HashMap();
+            tmp.put(group, spawn);
+            WORLDSPAWNS.put(spawn.getWorld().getName(), tmp);
+        }
+        saveWorldSpawns();
+    }
+    
+    /** Returns true if the list of worldspawns contains a the world worldName.
+     * @param worldName The string name of the world
+     * @return 
+     */
+    public static boolean worldHasSpawnsDefined(String worldName){
+        return WORLDSPAWNS.containsKey(worldName);
+    }
+    
+    /** Returns true if a specific world, worldName, has a spawn for group
+     * @param worldName World being checked
+     * @param group Group being checked
+     * @return 
+     */
+    public static boolean worldHasGroupSpawn(String worldName, String group){
+        return WORLDSPAWNS.containsKey(worldName) && WORLDSPAWNS.get(worldName).containsKey(group);
+    }
+    
+    /** Returns true if a specific group, group, has a global spawn set
+     * @param group The group being tested
+     * @return 
+     */
+    public static boolean groupHasGlobalSpawn(String group){
+        return GLOBALSPAWNS.containsKey(group);
+    }
+    
+    /** Removes the global spawn of group and saves a copy of the current spawns
+     * @param group Group who's global spawn is being removed
+     */
+    public static void removeGlobalSpawn(String group){
+        GLOBALSPAWNS.remove(group);
+        saveWorldSpawns();
+    }
+    
+    /** Removes the world spawn of group from world and saves a copy of the current spawns.
+     * This assumes the world has checked to exist using worldHasSpawnsDefined(String worldName)
+     * @param worldName The world from which the group spawn needs removed
+     * @param group The group being removed
+     */
+    public static void removeWorldSpawn(String worldName, String group){
+        WORLDSPAWNS.get(worldName).remove(group);
+        if (WORLDSPAWNS.get(worldName).isEmpty()) {
+            WORLDSPAWNS.remove(worldName);
+        }
+        saveWorldSpawns();
+    }
+    
+    /** Adds a group spawn to the global list.
+     * @param group Group to add a spawn for
+     * @param spawn The location of the spawn
+     */
+    public static void addGlobalSpawn(String group, Location spawn){
+        GLOBALSPAWNS.put(group, spawn);
+        saveWorldSpawns();
+    }
+    
+    /** Get the location of a global spawn. this assumes existence has been checked
+     * before calling or this may return null.
+     * @param group The group global spawn
+     * @return the location object of the group global spawn
+     */
+    public static Location getGlobalSpawn(String group){
+        return GLOBALSPAWNS.get(group);
+    }
+    
+    /** Get the location object of a group spawn in a specific world.
+     *  This assumed existence has already been checked or this may return null
+     * @param world The string name of the world being requested
+     * @param group The group spawn that is being retrieved
+     * @return the location where that group should spawn if no other viable location exists
+     */
+    public static Location getWorldSpawn(String world, String group){
+        return WORLDSPAWNS.get(world).get(group);
+    }
+    
+    /** Commit the hashmaps to JSONObjects and save them in a file.
+     */
+    private static void saveWorldSpawns(){
+        JSONObject spawns = new JSONObject();
+        for (String world : WORLDSPAWNS.keySet()){
+            JSONObject tmpGroup = new JSONObject();
+            for (String group : WORLDSPAWNS.get(world).keySet()){
+                tmpGroup.put(group, LocationDataHandler.packLocation(WORLDSPAWNS.get(world).get(group)));
+            }
+            spawns.put(world, tmpGroup);
+        }
+        
+        JSONObject tmpGroup = new JSONObject();
+        for (String group : GLOBALSPAWNS.keySet()){
+            tmpGroup.put(group, LocationDataHandler.packLocation(GLOBALSPAWNS.get(group)));
+        }
+        if (!tmpGroup.isEmpty()) spawns.put("GLOBAL", tmpGroup);
+            
+//        spawns.put("GLOBAL", new JSONObject(GLOBALSPAWNS));
+        JSONHandler.WriteJSONToFile(JawaCommands.getPlugin(), "/worldspawns.json", spawns);
+    }
+    
+    /** Send a list of spawns to the indicated player.
+     * TODO this should later be wrapped up in an async event that sync to send the messages so that the parsing isn't in main
+     * @param player The player who should receive the list
+     */
+    public static void listSpawns(Player player){
+        if (!WORLDSPAWNS.isEmpty()) {
+            BaseComponent[] msg = new ComponentBuilder()
+                    .append("> World group spawns:")
+                    .color(ChatColor.GREEN)
+                    .create();
+
+            player.spigot().sendMessage(msg);
+
+            for (String world : WORLDSPAWNS.keySet()) {
+                player.sendMessage(ChatColor.GREEN + "> Spawns for " + ChatColor.GOLD + world);
+                for (String group : WORLDSPAWNS.get(world).keySet()) {
+                    player.sendMessage(ChatColor.GREEN + " > " + group + " " + ChatColor.GREEN + WORLDSPAWNS.get(world).get(group).getBlockX() + "," + WORLDSPAWNS.get(world).get(group).getBlockY() + "," + WORLDSPAWNS.get(world).get(group).getBlockZ());
+                }
+            }
+        }
+
+        if (!GLOBALSPAWNS.isEmpty()) {
+            BaseComponent[] globalMSG = new ComponentBuilder()
+                    .append("> Global groups spawns:")
+                    .color(ChatColor.GREEN)
+                    .create();
+
+            player.spigot().sendMessage(globalMSG);
+
+            for (String group : GLOBALSPAWNS.keySet()) {
+                player.sendMessage(ChatColor.GREEN + " > " + group + " " + ChatColor.GREEN + GLOBALSPAWNS.get(group).getBlockX() + "," + GLOBALSPAWNS.get(group).getBlockY() + "," + GLOBALSPAWNS.get(group).getBlockZ());
+            }
+        }
+        
     }
 }

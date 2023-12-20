@@ -31,6 +31,7 @@ public class PlayerDeath implements Listener{
         if (event.getEntity().hasPermission("jawacommands.back")){
                     BackHandler.addUserBackLocation(event.getEntity(), event.getEntity().getLocation());
         }
+        
     }
     
 }

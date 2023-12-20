@@ -17,10 +17,15 @@
 package jawamaster.jawacommands.listeners;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import jawamaster.jawacommands.commands.PlayerTime;
-import jawamaster.jawacommands.commands.PlayerWeather;
+import jawamaster.jawacommands.commands.playeraugmentation.PlayerTime;
+import jawamaster.jawacommands.commands.playeraugmentation.PlayerWeather;
 import jawamaster.jawacommands.commands.home.Home;
+import jawamaster.jawacommands.commands.warps.ModWarp;
+import jawamaster.jawacommands.handlers.WarpHandler;
+import jawamaster.jawacommands.kit.KitCommand;
 import net.jawasystems.jawacore.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -41,32 +46,28 @@ public class TabCompleteListener implements Listener {
 
         //For the home command
         if (event.getBuffer().matches("/home\\s.*")) {
-            System.out.println("tab event entry");
-            List<String> complete = Home.TABCOMPLETES;
+            //System.out.println("tab event entry");
             List<String> homes = PlayerManager.getPlayerDataObject((Player) event.getSender()).getHomeList();
 
             String buffer;
             List<String> completes = new ArrayList();
             if (event.getBuffer().matches("/home\\s" + "(" + String.join("|", Home.SECONDS) + String.join("|", Home.NOSECONDS) + ").*")) {
-                System.out.println("tab event entry regex 1");
                 buffer = rebuildBuffer(event.getBuffer(), "/home\\s" + "(" + String.join("|", Home.SECONDS) + String.join("|", Home.NOSECONDS) + String.join("|", homes) + ")\\s");
                 completes.addAll(homes);
                 completes.addAll(Home.SECONDS);
                 completes.addAll(Home.NOSECONDS);
             } else if (event.getBuffer().matches("/home\\s" + "(" + String.join("|", Home.SECONDS) + ")\\s.*")) {
-                System.out.println("tab event entry regex 2");
                 buffer = rebuildBuffer(event.getBuffer(), "/home\\s" + "(" + String.join("|", Home.SECONDS) + ")\\s");
                 completes.addAll(homes);
             } else if (event.getBuffer().matches("/home\\s" + "(" + String.join("|", Home.NOSECONDS) + ")\\s.*")) {
-                System.out.println("tab event entry regex 3");
                 buffer = rebuildBuffer(event.getBuffer(), "/home\\s" + "(" + String.join("|", Home.NOSECONDS) + ")\\s");
             }else {
                 buffer = rebuildBuffer(event.getBuffer(), "/home\\s");
-                System.out.println("tab event entry regex 4");
                 completes.addAll(homes);
                 completes.addAll(Home.SECONDS);
                 completes.addAll(Home.NOSECONDS);
             }
+            //FIXME With this below do I even need the stuff above?
             event.setCompletions(StringUtil.copyPartialMatches(buffer, completes, new ArrayList()));
 
         } //For the ptime command
@@ -96,7 +97,59 @@ public class TabCompleteListener implements Listener {
             }
 
             event.setCompletions(StringUtil.copyPartialMatches(buffer, completes, new ArrayList()));
+        } 
+        
+        else if (event.getBuffer().matches("/modwarp\\s.*") && event.getSender().hasPermission(ModWarp.PERMISSION)) {
+            /*
+            /modwarp <warpname> <[whitelist|hidden|location|owner|type]> <[owner|type]>
+             */
+            if (event.getBuffer().matches("(/modwarp\\s|/modwarp\\s[a-zA-Z0-9]+)")) {
+                event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/modwarp\\s"), WarpHandler.getWarpNames(), new ArrayList()));
+            } else if (event.getBuffer().matches("/modwarp\\s" + "(" + String.join("|", WarpHandler.getWarpNames()) + ")\\s.*?$")) {
+                event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/modwarp\\s\\b[a-zA-Z0-9]+\\b\\s"), new ArrayList(Arrays.asList("hidden", "whitelist", "location", "owner", "type")), new ArrayList()));
+                if (event.getBuffer().matches("/modwarp\\s" + "(" + String.join("|", WarpHandler.getWarpNames()) + ")\\sowner\\s.*?")) {
+                    event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/modwarp\\s" + "(" + String.join("|", WarpHandler.getWarpNames()) + ")\\sowner\\s"), PlayerManager.getOnlinePlayerList(), new ArrayList()));
+                } else if (event.getBuffer().matches("/modwarp\\s" + "(" + String.join("|", WarpHandler.getWarpNames()) + ")\\stype\\s.*?")) {
+                    event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/modwarp\\s" + "(" + String.join("|", WarpHandler.getWarpNames()) + ")\\stype\\s"), new ArrayList(Arrays.asList("public", "private", "permission", "game")), new ArrayList()));
+                } 
+            }
+        } 
+        
+        else if (event.getBuffer().matches("/warp\\s.*")){
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/warp\\s"), WarpHandler.getVisibleWarpNames((Player) event.getSender()), new ArrayList()));
+        } 
+        
+        else if (event.getBuffer().matches("/makewarp\\s.*?")) {
+            event.setCompletions(new ArrayList(Arrays.asList("<[warpname]>")));
+            if (event.getBuffer().matches("/makewarp\\s.*?\\s.*"))
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/makewarp\\s.*?\\s"), new ArrayList(Arrays.asList("private","public","game","permission")), new ArrayList()));
+        } 
+        
+        else if (event.getBuffer().matches("/wlwarp\\s.*")) {
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/wlwarp\\s"), WarpHandler.getVisibleWarpNames((Player) event.getSender()), new ArrayList()));
+            if (event.getBuffer().matches("/wlwarp\\s.*?\\s.*?")) {
+                event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/wlwarp\\s.*?\\s"), new ArrayList(Arrays.asList("add", "remove")), new ArrayList()));
+                if (event.getBuffer().matches("/wlwarp\\s.*?\\s(add|remove)\\s.*?")) {
+                    event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/wlwarp\\s.*?\\s(add|remove)\\s"), PlayerManager.getOnlinePlayerList(), new ArrayList()));
+                }
+            }
         }
+        
+        else if (event.getBuffer().matches("/flyspeed\\s.*")) {
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/flyspeed\\s"), new LinkedList(Arrays.asList("1","2","3","4","6","8","10")), new ArrayList()));
+        }
+        
+        else if (event.getBuffer().matches("/walkspeed\\s.*")) {
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/walkspeed\\s"), new LinkedList(Arrays.asList("2","3","4","5","6","7","8","9","10")), new ArrayList()));
+        }
+        
+        else if (event.getBuffer().matches("/kit\\s.*")) {
+            event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/kit\\s"), KitCommand.tabs, new ArrayList()));
+            if (event.getBuffer().matches("/kit\\s.*?\\s.*?")){
+                event.setCompletions(StringUtil.copyPartialMatches(rebuildBuffer(event.getBuffer(), "/kit\\s*\\s*\\s"), KitCommand.tabsTwo, new ArrayList()));
+            }
+        }
+
 
     }
 
