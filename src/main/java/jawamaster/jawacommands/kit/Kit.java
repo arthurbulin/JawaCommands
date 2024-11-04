@@ -647,7 +647,7 @@ public class Kit {
      */
     public void announce(Player player){
         if (hasAnnounce()) {
-            String friendlyName = PlayerManager.getPlayerDataObject(player).getFriendlyName();
+            String friendlyName = PlayerManager.getPlayerDataObject(player).getFriendlyName().content();
             for (Player ply : Bukkit.getOnlinePlayers()) {
                 ply.sendMessage("*" + ChatColor.translateAlternateColorCodes('&', getAnnounce()).replaceAll("@p", friendlyName));
             }
@@ -659,7 +659,7 @@ public class Kit {
      */
     public void message(Player player){
         if (hasMessage()) {
-            String friendlyName = PlayerManager.getPlayerDataObject(player).getFriendlyName();
+            String friendlyName = PlayerManager.getPlayerDataObject(player).getFriendlyName().content();
             player.sendMessage("*" + ChatColor.translateAlternateColorCodes('&', getMessage()).replaceAll("@p", friendlyName));
         }
     }

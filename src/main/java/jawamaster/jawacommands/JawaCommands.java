@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import jawamaster.jawacommands.commands.development.TestCommand;
 import jawamaster.jawacommands.handlers.CommandControlHandler;
 import jawamaster.jawacommands.handlers.HomeHandler;
+import jawamaster.jawacommands.handlers.MessageHandler;
 import jawamaster.jawacommands.kit.KitHandler;
 import jawamaster.jawacommands.handlers.WarpHandler;
 import jawamaster.jawacommands.handlers.WorldHandler;
@@ -29,7 +30,6 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  *
@@ -142,6 +142,11 @@ public class JawaCommands extends JavaPlugin {
         if (config.contains("warp-settings")){
             warpsEnabled = config.getConfigurationSection("warp-settings").getBoolean("warps-enabled", false);
             JawaCore.registerIndexLiteral("warps", config.getString("index-customization.warps", "warps"), JawaCommands.getPlugin().getName());
+        }
+        
+        MessageHandler.loadDefaultMessages();
+        if (config.contains("messages")){
+            MessageHandler.loadCustomMessages(config.getConfigurationSection("messages"));
         }
         
         JawaCore.receiveConfigurations(JawaCommands.plugin.getName(), config);

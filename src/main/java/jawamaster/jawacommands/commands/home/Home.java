@@ -90,7 +90,7 @@ public class Home implements CommandExecutor{
 //                player.sendMessage(usage);
 //            }//-l list homes 
 //            else if (args[0].equals("-l") || args[0].equals("l")|| args[0].equalsIgnoreCase("list")){
-//                HomeHandler.sendHomeList(player);
+//                HomeHandler.sendOtherHomeList(player);
 //            } else if (nots.contains(args[0])) { //Make sure it's not one of the other flags
 //                player.sendMessage(ChatColor.DARK_RED + " > That flag requires an argument! See /home -h");
 //            } else { //Attempt to tp them to the location and deal with special bed case

@@ -18,11 +18,12 @@ package jawamaster.jawacommands.commands.admin;
 
 import jawamaster.jawacommands.JawaCommands;
 import jawamaster.jawacommands.handlers.FreezeHandler;
+import jawamaster.jawacommands.handlers.MessageHandler;
 import net.jawasystems.jawacore.PlayerManager;
 import net.jawasystems.jawacore.dataobjects.PlayerDataObject;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -34,43 +35,36 @@ import org.bukkit.command.CommandSender;
  */
 public class Freeze implements CommandExecutor {
 
+    private static final TextComponent USAGE = Component.text(" > ", NamedTextColor.GREEN)
+            .append(Component.text("/freeze <player>", NamedTextColor.WHITE));
+    
     @Override
     public boolean onCommand(CommandSender commandSender, Command arg1, String arg2, String[] args) {
-        String usage = "/freeze <player>";
         if (args == null || args.length == 0) {
-            commandSender.sendMessage(ChatColor.GREEN + "> " + usage);
+            commandSender.sendMessage(USAGE);
         } else if (args.length > 0) {
             PlayerDataObject target = PlayerManager.getPlayerDataObject(args[0]);
             if (target == null) {
-                commandSender.sendMessage(ChatColor.RED + " > Error: That player is not found! Try their actual minecraft name instead of nickname.");
+                commandSender.sendMessage(MessageHandler.getMessage("player-not-found"));
                 return true;
             }
 
             if (!FreezeHandler.isFrozen(target.getUniqueID())) {
                 FreezeHandler.freeze(target);
-//                BaseComponent[] baseComp = new ComponentBuilder("[").color(ChatColor.DARK_GRAY)
-//                    .italic(true)
-//                    .append(target.getPlainNick() + "has been unmuted by ")
-//                    .append(admin.getPlainNick())
-//                    .append("]")
-//                    .create();
-//                
-                //ChatHandler.opBroadcast(baseComp);
+                TextComponent message = MessageHandler.runReplace("{p}", MessageHandler.getMessage("freeze-public-freeze"), target.getFriendlyName());
                 if (JawaCommands.getConfiguration().getBoolean("freeze-public-messages", true)) {
-                    String publicMessage = JawaCommands.getConfiguration().getString("freeze-public-freeze", "&3> A sudden chill passes over {p}");
-                    publicMessage = publicMessage.replace("{p}", target.getFriendlyName());
-                    Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', publicMessage));
+                    Bukkit.getServer().broadcast(message);
                 } else {
-                    commandSender.sendMessage(ChatColor.GREEN + "> " + target.getFriendlyName() + ChatColor.GREEN + " has been " + ChatColor.AQUA + "frozen.");
+                    commandSender.sendMessage(message);
                 }
+                
             } else {
                 FreezeHandler.thaw(target);
+                TextComponent message = MessageHandler.runReplace("{p}", MessageHandler.getMessage("freeze-public-thaw"), target.getFriendlyName());
                 if (JawaCommands.getConfiguration().getBoolean("freeze-public-messages", true)) {
-                    String publicMessage = JawaCommands.getConfiguration().getString("freeze-public-thaw", "&6> {p} is warmed by the light");
-                    publicMessage = publicMessage.replace("{p}", target.getFriendlyName());
-                    Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', publicMessage));
+                    Bukkit.getServer().broadcast(message);
                 } else {
-                    commandSender.sendMessage(ChatColor.GREEN + "> " + target.getFriendlyName() + ChatColor.GREEN + " has been " + ChatColor.GOLD + "thawed.");
+                    commandSender.sendMessage(message);
                 }
             }
         }

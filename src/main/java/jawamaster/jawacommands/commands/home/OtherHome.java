@@ -49,7 +49,7 @@ public class OtherHome implements CommandExecutor {
             
             switch (args.length) {
                 case 1:
-                    HomeHandler.sendHomeList(player, pdo);
+                    HomeHandler.sendOtherHomeList(player, pdo);
                     break;
                 case 2:
                     HomeHandler.sendToOtherHome(player, args[1], pdo);
