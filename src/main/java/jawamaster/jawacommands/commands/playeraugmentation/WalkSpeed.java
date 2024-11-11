@@ -48,7 +48,7 @@ public class WalkSpeed implements CommandExecutor {
         if (args == null | args.length == 0) {
 //            ((Player) commandSender).setWalkSpeed(.2f);
             ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-            ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+            ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
             ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
             commandSender.sendMessage(ChatColor.GREEN + "> Walk speed reset to normal.");
 //            commandSender.sendMessage("Exhastuon:" + ((Player) commandSender).getExhaustion());
@@ -62,92 +62,92 @@ public class WalkSpeed implements CommandExecutor {
                 case "2":
 //                    ((Player) commandSender).setWalkSpeed(.2f);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 2, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 2, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 2, false, false, false));
                     if (adverseEffect) ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed reset to normal.");
                     break;
                 case "3":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.3f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 5, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 5, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 5, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 5, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Scout.");
                     break;
                 case "4":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.4f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 7, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 5, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 5, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 7, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Lightning McQueen.");
                     break;
                 case "5":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.5f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 10, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 5, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 5, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 10, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Rainbow Dash.");
                     break;
                 case "6":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.6f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 14, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 6, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 6, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 14, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Saitama.");
                     break;
                 case "7":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.7f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 20, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 7, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 7, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 20, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Road Runner.");
                     break;
                 case "8":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.8f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 30, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 8, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 8, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 30, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Dash.");
                     break;
                 case "9":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(.9f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 40, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 9, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 9, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 40, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to Sonic.");
                     break;
                 case "10":
                     ((Player) commandSender).removePotionEffect(PotionEffectType.SPEED);
-                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP);
+                    ((Player) commandSender).removePotionEffect(PotionEffectType.JUMP_BOOST);
                     ((Player) commandSender).removePotionEffect(PotionEffectType.HUNGER);
 //                    ((Player) commandSender).setWalkSpeed(1f);
 //                    ((Player) commandSender).setExhaustion(1.0f);
                     ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 50, false, false, false));
-                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 10, false, false, false));
+                    ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 10, false, false, false));
                     if (adverseEffect) ((Player) commandSender).addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, Integer.MAX_VALUE, 50, false, false, false));
                     commandSender.sendMessage(ChatColor.GREEN + "> Walk speed set to The Flash.");
                     break;
